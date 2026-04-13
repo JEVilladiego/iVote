@@ -59,6 +59,7 @@ $startDateJs = $targetElection ? $targetElection['start_date'] : null;
             background-attachment: fixed;
             min-height: 100vh;
             /* padding: 100px 24px 60px; */
+            margin-top: 90px;
         }
 
         .page-wrap {

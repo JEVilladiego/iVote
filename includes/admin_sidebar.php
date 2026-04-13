@@ -15,7 +15,6 @@ $user          = currentUser();
     </div>
     <nav class="sidebar-menu">
         <a href="/admin/dashboard.php"   class="<?= $sidebarActive==='dashboard'   ? 'active':'' ?>">📊 Dashboard</a>
-        <a href="/admin/verification.php" class="<?= $sidebarActive==='verification' ? 'active':'' ?>">✅ Validate Accounts</a>
         <a href="/admin/accounts.php"    class="<?= $sidebarActive==='accounts'    ? 'active':'' ?>">👥 Manage Accounts</a>
         <a href="/admin/elections.php"   class="<?= $sidebarActive==='elections'   ? 'active':'' ?>">🗳️ Manage Elections</a>
         <a href="/admin/candidates.php"  class="<?= $sidebarActive==='candidates'  ? 'active':'' ?>">🏅 Manage Candidates</a>

@@ -114,7 +114,7 @@ $navActive = 'home';
 <!-- HERO -->
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge"><span>COSAA Election 2026-2027</span></div>
+        <div class="hero-badge"><span>COSA Election 2026-2027</span></div>
         <h1>Your Vote.<br>Your Voice. Your Future.</h1>
         <p>The official secure online voting platform for the COS Student Organization. Cast your ballot from anywhere — fast, transparent, and tamper-proof.</p>
         <div class="hero-btns">

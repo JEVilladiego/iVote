@@ -1,6 +1,8 @@
 <?php
 // =============================================================
-//  admin/candidates.php  (replaces electionmanager.php)
+//  admin/candidates.php
+//  Adding or removing candidates is BLOCKED when the election
+//  status is 'ongoing'. Only allowed for 'upcoming' elections.
 // =============================================================
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
@@ -8,12 +10,33 @@ requireAdmin();
 
 $db = getDB();
 
+// Auto-sync statuses before any action
+$db->exec("UPDATE elections SET status='ongoing' WHERE start_date <= NOW() AND end_date >= NOW() AND status='upcoming'");
+$db->exec("UPDATE elections SET status='ended'   WHERE end_date   <  NOW() AND status='ongoing'");
+
 // ---- HANDLE POST -------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    $elecId = intval($_POST['election_id'] ?? 0);
+
+    // Verify election exists and is not ongoing/ended
+    $elec = null;
+    if ($elecId) {
+        $es = $db->prepare("SELECT * FROM elections WHERE id=? LIMIT 1");
+        $es->execute([$elecId]);
+        $elec = $es->fetch();
+    }
+
+    if ($elec && $elec['status'] === 'ongoing') {
+        setFlash('error', 'Candidates cannot be added or removed while an election is ongoing.');
+        header("Location: /admin/candidates.php?election_id=$elecId"); exit;
+    }
+    if ($elec && $elec['status'] === 'ended') {
+        setFlash('error', 'This election has already ended. Candidate list is locked.');
+        header("Location: /admin/candidates.php?election_id=$elecId"); exit;
+    }
 
     if ($action === 'add') {
-        $elecId  = intval($_POST['election_id']);
         $posId   = intval($_POST['position_id']);
         $name    = trim($_POST['name']         ?? '');
         $sid     = trim($_POST['student_id']   ?? '');
@@ -23,14 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $plats   = trim($_POST['platforms']    ?? '');
         $achieve = trim($_POST['achievements'] ?? '');
 
-        // Handle Photo Upload
         $photoPath = '';
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-            $filename = 'cand_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+            $filename  = 'cand_' . time() . '_' . rand(1000,9999) . '.' . $ext;
             $uploadDir = __DIR__ . '/../uploads/profiles/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            
             if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $filename)) {
                 $photoPath = '/uploads/profiles/' . $filename;
             }
@@ -51,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'delete') {
         $candId = intval($_POST['candidate_id']);
-        $elecId = intval($_POST['election_id']);
         $db->prepare("DELETE FROM candidates WHERE id=?")->execute([$candId]);
         setFlash('success', 'Candidate removed.');
         header("Location: /admin/candidates.php?election_id=$elecId"); exit;
@@ -69,28 +89,27 @@ foreach ($elections as $e) {
     if ($e['id'] === $selectedElecId) { $selectedElec = $e; break; }
 }
 
-// Load positions + candidates for selected election
+$isLocked = $selectedElec && in_array($selectedElec['status'], ['ongoing', 'ended']);
+
+// Load positions + candidates
 $positions  = [];
 $candidates = [];
 if ($selectedElecId) {
-    $positions = $db->prepare(
-        "SELECT * FROM positions WHERE election_id=? ORDER BY sort_order"
-    );
-    $positions->execute([$selectedElecId]);
-    $positions = $positions->fetchAll();
+    $ps = $db->prepare("SELECT * FROM positions WHERE election_id=? ORDER BY sort_order");
+    $ps->execute([$selectedElecId]);
+    $positions = $ps->fetchAll();
 
-    $candidates = $db->prepare(
+    $cs = $db->prepare(
         "SELECT c.*, p.title AS position_title
          FROM candidates c
          JOIN positions p ON p.id=c.position_id
          WHERE c.election_id=?
          ORDER BY p.sort_order, c.name"
     );
-    $candidates->execute([$selectedElecId]);
-    $candidates = $candidates->fetchAll();
+    $cs->execute([$selectedElecId]);
+    $candidates = $cs->fetchAll();
 }
 
-// Group candidates by position
 $byPosition = [];
 foreach ($candidates as $c) {
     $byPosition[$c['position_id']][] = $c;
@@ -113,7 +132,6 @@ $flash         = getFlash();
         .main { flex:1; margin-left:280px; padding:40px; }
         h2 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.6rem; font-weight:900; margin-bottom:20px; }
 
-        /* Election selector */
         .election-selector { display:flex; gap:12px; align-items:center; margin-bottom:28px; flex-wrap:wrap; }
         .selector-label { font-weight:700; color:#33553e; font-size:0.9rem; }
         .election-select {
@@ -123,11 +141,19 @@ $flash         = getFlash();
         }
         .election-select:focus { border-color:#33553e; }
 
-        /* Layout: form left, list right */
+        /* Lock banner */
+        .lock-banner {
+            background:#fef3c7; border:1px solid #fcd34d; border-radius:14px;
+            padding:16px 20px; margin-bottom:24px; display:flex; align-items:center; gap:12px;
+        }
+        .lock-banner.ended { background:#f1f5f9; border-color:#e2e8f0; }
+        .lock-banner .lock-icon { font-size:1.5rem; flex-shrink:0; }
+        .lock-banner p { font-size:0.9rem; font-weight:600; color:#92400e; margin:0; }
+        .lock-banner.ended p { color:#64748b; }
+
         .content-grid { display:grid; grid-template-columns:380px 1fr; gap:28px; align-items:start; }
         @media(max-width:1100px){ .content-grid{ grid-template-columns:1fr; } }
 
-        /* Add candidate form */
         .form-card {
             background:#fff; border-radius:20px; padding:28px;
             border:1px solid #e2e8f0; box-shadow:0 4px 16px rgba(0,0,0,0.05);
@@ -148,21 +174,17 @@ $flash         = getFlash();
             font-size:14px; cursor:pointer; transition:all 0.2s; margin-top:6px;
         }
         .btn-add:hover { background:#33553e; transform:translateY(-2px); }
+        .btn-add:disabled { background:#94a3b8; cursor:not-allowed; transform:none; }
 
-        /* Candidates by position */
         .positions-wrapper { display:flex; flex-direction:column; gap:20px; }
         .position-section { background:#fff; border-radius:18px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 3px 12px rgba(0,0,0,0.04); }
         .position-header {
-            background:linear-gradient(135deg,#12341d,#33553e);
-            color:#fff; padding:14px 20px;
-            display:flex; justify-content:space-between; align-items:center;
+            background:linear-gradient(135deg,#12341d,#33553e); color:#fff;
+            padding:14px 20px; display:flex; justify-content:space-between; align-items:center;
         }
         .position-name { font-family:'Montserrat',sans-serif; font-weight:800; font-size:0.95rem; }
-        .cand-count-badge {
-            background:rgba(255,255,255,0.2); padding:3px 10px;
-            border-radius:100px; font-size:0.75rem; font-weight:700;
-        }
-        .cand-list { padding:16px; display:flex; flex-direction:column; gap:10px; }
+        .cand-count-badge { background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:100px; font-size:0.75rem; font-weight:700; }
+        .cand-list { padding:12px; display:flex; flex-direction:column; gap:8px; }
         .cand-row {
             display:flex; align-items:center; justify-content:space-between;
             gap:12px; padding:12px 16px; background:#f8fafc;
@@ -177,13 +199,14 @@ $flash         = getFlash();
             border-radius:8px; cursor:pointer; font-size:14px; flex-shrink:0; transition:all 0.2s;
         }
         .btn-del-cand:hover { background:#dc2626; color:#fff; }
+        .btn-del-cand:disabled { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; }
         .empty-pos { padding:16px 20px; color:#94a3b8; font-size:0.85rem; text-align:center; }
         .no-election { text-align:center; padding:60px 20px; color:#94a3b8; }
         .no-election .icon { font-size:3rem; margin-bottom:14px; }
     </style>
 </head>
 <body>
-<?php $navActive='dashboard'; require_once __DIR__ . '/../includes/navbar.php'; ?>
+<?php require_once __DIR__ . '/../includes/navbar.php'; ?>
 <div class="page-wrap">
     <?php require_once __DIR__ . '/../includes/admin_sidebar.php'; ?>
     <main class="main">
@@ -216,10 +239,27 @@ $flash         = getFlash();
         </div>
 
         <?php else: ?>
+
+        <?php if ($selectedElec && $selectedElec['status'] === 'ongoing'): ?>
+        <div class="lock-banner">
+            <span class="lock-icon">🔒</span>
+            <p>This election is currently <strong>ongoing</strong>. The candidate list is locked — no additions or removals are allowed until the election ends.</p>
+        </div>
+        <?php elseif ($selectedElec && $selectedElec['status'] === 'ended'): ?>
+        <div class="lock-banner ended">
+            <span class="lock-icon">🏁</span>
+            <p>This election has <strong>ended</strong>. The candidate list is permanently locked.</p>
+        </div>
+        <?php endif; ?>
+
         <div class="content-grid">
 
+            <!-- Add Candidate Form -->
             <div class="form-card">
                 <h3>➕ Add Candidate</h3>
+                <?php if ($isLocked): ?>
+                    <p style="color:#94a3b8;font-size:0.88rem">Adding candidates is disabled while the election is <?= $selectedElec['status'] ?>.</p>
+                <?php else: ?>
                 <form method="POST" action="/admin/candidates.php" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="election_id" value="<?= $selectedElecId ?>">
@@ -252,12 +292,10 @@ $flash         = getFlash();
                             <option>BS Mathematics</option>
                         </select>
                     </div>
-                    
                     <div class="form-row">
                         <label class="form-label">Candidate Photo</label>
                         <input class="form-input" type="file" name="photo" accept="image/*">
                     </div>
-
                     <div class="form-row">
                         <label class="form-label">Partylist</label>
                         <input class="form-input" type="text" name="partylist" placeholder="Party name (optional)">
@@ -276,8 +314,10 @@ $flash         = getFlash();
                     </div>
                     <button type="submit" class="btn-add">Add Candidate</button>
                 </form>
+                <?php endif; ?>
             </div>
 
+            <!-- Candidates by position -->
             <div class="positions-wrapper">
                 <?php if (empty($positions)): ?>
                     <div class="no-election"><p>No positions found for this election.</p></div>
@@ -302,12 +342,16 @@ $flash         = getFlash();
                                     <?php if ($c['partylist']): ?>
                                         <span class="cand-party"><?= htmlspecialchars($c['partylist']) ?></span>
                                     <?php endif; ?>
+                                    <?php if (!$isLocked): ?>
                                     <form method="POST" onsubmit="return confirm('Remove this candidate?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="candidate_id" value="<?= $c['id'] ?>">
                                         <input type="hidden" name="election_id" value="<?= $selectedElecId ?>">
                                         <button type="submit" class="btn-del-cand" title="Remove">✕</button>
                                     </form>
+                                    <?php else: ?>
+                                        <button class="btn-del-cand" disabled title="Locked">✕</button>
+                                    <?php endif; ?>
                                 </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>

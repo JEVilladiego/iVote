@@ -1,6 +1,8 @@
 <?php
 // =============================================================
-//  admin/accounts.php  (replaces AccountMan.php)
+//  admin/accounts.php
+//  Admin feeds student credentials directly. Accounts are
+//  created as 'approved' instantly — no COR or verification flow.
 // =============================================================
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
@@ -8,21 +10,83 @@ requireAdmin();
 
 $db = getDB();
 
-// ---- DELETE (AJAX POST) ------------------------------------
+// ---- CREATE ACCOUNT (POST) ---------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    $raw    = file_get_contents('php://input');
-    $data   = json_decode($raw, true);
-    $userId = intval($data['userId'] ?? 0);
-    if ($userId && $userId !== (int)$_SESSION['user_id']) {
-        $db->prepare("DELETE FROM users WHERE id=? AND role='student'")->execute([$userId]);
-        echo json_encode(['status'=>'success']); exit;
+    $act = $_POST['action'] ?? '';
+
+    // ── Create new student account ──────────────────────────
+    if ($act === 'create') {
+        header('Content-Type: application/json');
+        $sid    = trim($_POST['student_id']  ?? '');
+        $fname  = trim($_POST['first_name']  ?? '');
+        $lname  = trim($_POST['last_name']   ?? '');
+        $mi     = trim($_POST['middle_initial'] ?? '');
+        $course = trim($_POST['course']      ?? '');
+        $year   = trim($_POST['year_level']  ?? '1st Year');
+        $pass   = trim($_POST['password']    ?? '');
+
+        if (!$sid || !$fname || !$lname || !$course || !$pass) {
+            echo json_encode(['status'=>'error','message'=>'All required fields must be filled.']); exit;
+        }
+        if (strlen($pass) < 6) {
+            echo json_encode(['status'=>'error','message'=>'Password must be at least 6 characters.']); exit;
+        }
+
+        // Check duplicate student ID
+        $chk = $db->prepare("SELECT id FROM users WHERE student_id=? LIMIT 1");
+        $chk->execute([$sid]);
+        if ($chk->fetch()) {
+            echo json_encode(['status'=>'error','message'=>'That Student ID is already registered.']); exit;
+        }
+
+        $email = strtolower(str_replace(['-',' '], '', $sid)) . '@student.edu.ph';
+        $hash  = password_hash($pass, PASSWORD_BCRYPT, ['cost' => 12]);
+
+        $ins = $db->prepare(
+            "INSERT INTO users (student_id, first_name, last_name, middle_initial, email,
+                                password_hash, course, year_level, role, status, verified_at, verified_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'student', 'approved', NOW(), ?)"
+        );
+        $ins->execute([$sid, $fname, $lname, $mi, $email, $hash, $course, $year, $_SESSION['user_id']]);
+        $newId = $db->lastInsertId();
+
+        echo json_encode([
+            'status'  => 'success',
+            'message' => "Account for $fname $lname created.",
+            'user'    => [
+                'id' => $newId, 'student_id' => $sid,
+                'name' => "$fname $lname", 'course' => $course,
+                'year_level' => $year, 'status' => 'approved',
+            ]
+        ]); exit;
     }
-    echo json_encode(['status'=>'error','message'=>'Invalid request.']); exit;
+
+    // ── Delete account (AJAX) ────────────────────────────────
+    if ($act === 'delete') {
+        header('Content-Type: application/json');
+        $raw    = file_get_contents('php://input');
+        $data   = json_decode($raw, true) ?? $_POST;
+        $userId = intval($data['userId'] ?? $_POST['userId'] ?? 0);
+        if ($userId && $userId !== (int)$_SESSION['user_id']) {
+            $db->prepare("DELETE FROM users WHERE id=? AND role='student'")->execute([$userId]);
+            echo json_encode(['status'=>'success']); exit;
+        }
+        echo json_encode(['status'=>'error','message'=>'Invalid request.']); exit;
+    }
+}
+
+// ---- VIEW DETAIL (AJAX GET) --------------------------------
+if (isset($_GET['detail'])) {
+    header('Content-Type: application/json');
+    $uid = intval($_GET['detail']);
+    $s   = $db->prepare("SELECT * FROM users WHERE id=? AND role='student'");
+    $s->execute([$uid]);
+    echo json_encode($s->fetch() ?: ['error'=>'Not found']);
+    exit;
 }
 
 // ---- LOAD ACCOUNTS -----------------------------------------
-$search     = trim($_GET['q']   ?? '');
+$search     = trim($_GET['q']    ?? '');
 $filterYear = trim($_GET['year'] ?? '');
 $page       = max(1, intval($_GET['page'] ?? 1));
 $perPage    = 10;
@@ -42,22 +106,12 @@ $whereSQL = implode(' AND ', $where);
 
 $countStmt = $db->prepare("SELECT COUNT(*) FROM users WHERE $whereSQL");
 $countStmt->execute($params);
-$total     = $countStmt->fetchColumn();
-$pages     = ceil($total / $perPage);
+$total = $countStmt->fetchColumn();
+$pages = ceil($total / $perPage);
 
 $stmt = $db->prepare("SELECT * FROM users WHERE $whereSQL ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $accounts = $stmt->fetchAll();
-
-// View-only detail via modal (AJAX GET)
-if (isset($_GET['detail'])) {
-    header('Content-Type: application/json');
-    $uid = intval($_GET['detail']);
-    $s   = $db->prepare("SELECT * FROM users WHERE id=? AND role='student'");
-    $s->execute([$uid]);
-    echo json_encode($s->fetch() ?: ['error'=>'Not found']);
-    exit;
-}
 
 $navActive     = 'dashboard';
 $sidebarActive = 'accounts';
@@ -75,7 +129,10 @@ $sidebarActive = 'accounts';
         .page-wrap { display:flex; }
         .main { flex:1; margin-left:280px; padding:40px; }
         h2 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.6rem; font-weight:800; margin-bottom:20px; }
-        .filters { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+
+        /* Top bar */
+        .top-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:center; justify-content:space-between; }
+        .filters { display:flex; gap:12px; flex-wrap:wrap; }
         .filter-input {
             padding:10px 14px; border:1px solid #e2e8f0; border-radius:10px;
             font-size:14px; outline:none; transition:border 0.2s; font-family:'Geist',sans-serif;
@@ -85,6 +142,12 @@ $sidebarActive = 'accounts';
             padding:10px 20px; background:#12341d; color:#fff; border:none;
             border-radius:10px; font-weight:700; cursor:pointer; font-family:'Montserrat',sans-serif; font-size:13px;
         }
+        .btn-new {
+            padding:10px 22px; background:#33553e; color:#fff; border:none;
+            border-radius:10px; font-weight:800; cursor:pointer; font-family:'Montserrat',sans-serif;
+            font-size:13px; display:flex; align-items:center; gap:8px; transition:all 0.2s;
+        }
+        .btn-new:hover { background:#12341d; transform:translateY(-1px); }
 
         /* Account cards */
         .accounts-list { display:flex; flex-direction:column; gap:14px; }
@@ -123,42 +186,69 @@ $sidebarActive = 'accounts';
         }
         .pg-btn:hover, .pg-btn.active { background:#12341d; color:#fff; border-color:#12341d; }
 
-        /* Modal */
+        /* Modal base */
         .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:9999; }
         .modal-overlay.open { display:flex; }
         .modal-box {
-            background:#fff; border-radius:20px; padding:32px; width:400px; max-width:92vw;
+            background:#fff; border-radius:20px; padding:32px; width:420px; max-width:92vw;
             position:relative; animation:popIn 0.25s ease;
         }
         @keyframes popIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
         .modal-close { position:absolute; right:18px; top:14px; font-size:22px; cursor:pointer; color:#64748b; background:none; border:none; }
         .modal-box h3 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.2rem; margin-bottom:18px; }
+
+        /* Detail modal */
         .detail-row { padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:0.9rem; }
         .detail-row:last-child { border-bottom:none; }
         .detail-label { font-weight:700; color:#64748b; font-size:0.78rem; text-transform:uppercase; }
         .detail-val   { color:#0f172a; margin-top:2px; }
+
+        /* Create modal form */
+        .form-row { margin-bottom:14px; }
+        .form-label { font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; display:block; margin-bottom:5px; }
+        .form-input, .form-select {
+            width:100%; padding:10px 13px; border:1px solid #e2e8f0; border-radius:10px;
+            font-size:13px; font-family:'Geist',sans-serif; outline:none; transition:border 0.2s; box-sizing:border-box;
+        }
+        .form-input:focus, .form-select:focus { border-color:#33553e; }
+        .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .btn-submit {
+            width:100%; padding:13px; background:#12341d; color:#fff; border:none;
+            border-radius:12px; font-family:'Montserrat',sans-serif; font-weight:800;
+            font-size:14px; cursor:pointer; transition:all 0.2s; margin-top:6px;
+        }
+        .btn-submit:hover { background:#33553e; }
+        .form-error { background:#fee2e2; color:#991b1b; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; margin-bottom:12px; display:none; }
+        .form-success { background:#d1fae5; color:#065f46; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; margin-bottom:12px; display:none; }
+        .required-star { color:#ef4444; }
     </style>
 </head>
 <body>
-<?php $navActive='dashboard'; require_once __DIR__ . '/../includes/navbar.php'; ?>
+<?php require_once __DIR__ . '/../includes/navbar.php'; ?>
 
 <div class="page-wrap">
     <?php require_once __DIR__ . '/../includes/admin_sidebar.php'; ?>
     <main class="main">
         <h2>Voter Accounts</h2>
-        <form method="GET" action="" class="filters">
-            <input class="filter-input" name="q"    placeholder="Search name or ID..." value="<?= htmlspecialchars($search) ?>">
-            <select class="filter-input" name="year">
-                <option value="">All Year Levels</option>
-                <?php foreach (['1st Year','2nd Year','3rd Year','4th Year'] as $yr): ?>
-                    <option <?= $filterYear===$yr?'selected':'' ?>><?= $yr ?></option>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit" class="filter-btn">Search</button>
-            <a href="/admin/accounts.php" style="padding:10px 18px;color:#33553e;font-weight:600;text-decoration:none;font-size:14px;display:flex;align-items:center">Clear</a>
-        </form>
 
-        <div class="accounts-list">
+        <div class="top-bar">
+            <form method="GET" action="" class="filters">
+                <input class="filter-input" name="q" placeholder="Search name or ID..." value="<?= htmlspecialchars($search) ?>">
+                <select class="filter-input" name="year">
+                    <option value="">All Year Levels</option>
+                    <?php foreach (['1st Year','2nd Year','3rd Year','4th Year'] as $yr): ?>
+                        <option <?= $filterYear===$yr?'selected':'' ?>><?= $yr ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="filter-btn">Search</button>
+                <a href="/admin/accounts.php" style="padding:10px 18px;color:#33553e;font-weight:600;text-decoration:none;font-size:14px;display:flex;align-items:center">Clear</a>
+            </form>
+            <button class="btn-new" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i> Add Student Account
+            </button>
+        </div>
+
+        <div class="accounts-list" id="accountsList">
             <?php if (empty($accounts)): ?>
                 <p style="color:#64748b;padding:30px 0;text-align:center">No accounts found.</p>
             <?php endif; ?>
@@ -192,24 +282,83 @@ $sidebarActive = 'accounts';
             <?php endfor; ?>
         </div>
         <?php endif; ?>
-
         <p style="color:#64748b;font-size:0.83rem;text-align:center;margin-top:14px">
             Showing <?= count($accounts) ?> of <?= $total ?> accounts
         </p>
     </main>
 </div>
 
-<!-- Detail Modal -->
+<!-- ── View Detail Modal ── -->
 <div class="modal-overlay" id="detailModal">
     <div class="modal-box">
-        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
         <h3>Voter Details</h3>
         <div id="modalContent"></div>
     </div>
 </div>
 
+<!-- ── Create Account Modal ── -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box" style="width:480px">
+        <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
+        <h3>➕ Add Student Account</h3>
+        <div class="form-error"  id="createError"></div>
+        <div class="form-success" id="createSuccess"></div>
+
+        <div class="form-grid-2">
+            <div class="form-row">
+                <label class="form-label">First Name <span class="required-star">*</span></label>
+                <input class="form-input" id="cf_fname" type="text" placeholder="Juan">
+            </div>
+            <div class="form-row">
+                <label class="form-label">Last Name <span class="required-star">*</span></label>
+                <input class="form-input" id="cf_lname" type="text" placeholder="Dela Cruz">
+            </div>
+        </div>
+        <div class="form-row">
+            <label class="form-label">Middle Initial</label>
+            <input class="form-input" id="cf_mi" type="text" placeholder="A." maxlength="5">
+        </div>
+        <div class="form-row">
+            <label class="form-label">Student ID <span class="required-star">*</span></label>
+            <input class="form-input" id="cf_sid" type="text" placeholder="M2024-00000">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-row">
+                <label class="form-label">Course <span class="required-star">*</span></label>
+                <select class="form-select" id="cf_course">
+                    <option value="">Select course</option>
+                    <option>BS Biology</option>
+                    <option>BS Computer Science</option>
+                    <option>BS Human Services</option>
+                    <option>BS Psychology</option>
+                    <option>BS Mathematics</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label">Year Level</label>
+                <select class="form-select" id="cf_year">
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                    <option>3rd Year</option>
+                    <option>4th Year</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <label class="form-label">Password <span class="required-star">*</span></label>
+            <input class="form-input" id="cf_pass" type="text" placeholder="Min. 6 characters">
+            <span style="font-size:0.75rem;color:#94a3b8;margin-top:4px;display:block">
+                This will be the student's login password. Share it with them directly.
+            </span>
+        </div>
+        <button class="btn-submit" id="createSubmitBtn" onclick="submitCreate()">Create Account</button>
+    </div>
+</div>
+
 <script src="/assets/js/shared.js"></script>
 <script>
+// ── View detail ──────────────────────────────────────────────
 async function viewAccount(id) {
     const res  = await fetch(`/admin/accounts.php?detail=${id}`);
     const data = await res.json();
@@ -227,22 +376,91 @@ async function viewAccount(id) {
     document.getElementById('detailModal').classList.add('open');
 }
 
-function closeModal() { document.getElementById('detailModal').classList.remove('open'); }
-document.getElementById('detailModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
-
+// ── Delete ───────────────────────────────────────────────────
 async function deleteAccount(id, name) {
     if (!confirm(`Delete account for "${name}"? This cannot be undone.`)) return;
     const res    = await fetch('/admin/accounts.php', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({userId:id})
+        body: JSON.stringify({userId: id})
     });
     const result = await res.json();
     if (result.status === 'success') {
-        const el = document.getElementById('acc-'+id);
-        el.style.transition='opacity 0.3s'; el.style.opacity='0';
+        const el = document.getElementById('acc-' + id);
+        el.style.transition = 'opacity 0.3s'; el.style.opacity = '0';
         setTimeout(() => el.remove(), 300);
     } else { alert('Error: ' + result.message); }
 }
+
+// ── Create modal ─────────────────────────────────────────────
+function openCreateModal() {
+    document.getElementById('createError').style.display   = 'none';
+    document.getElementById('createSuccess').style.display = 'none';
+    ['cf_fname','cf_lname','cf_mi','cf_sid','cf_pass'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('cf_course').value = '';
+    document.getElementById('cf_year').value   = '1st Year';
+    document.getElementById('createModal').classList.add('open');
+}
+
+async function submitCreate() {
+    const errEl = document.getElementById('createError');
+    const sucEl = document.getElementById('createSuccess');
+    errEl.style.display = sucEl.style.display = 'none';
+
+    const body = new URLSearchParams({
+        action:         'create',
+        first_name:     document.getElementById('cf_fname').value.trim(),
+        last_name:      document.getElementById('cf_lname').value.trim(),
+        middle_initial: document.getElementById('cf_mi').value.trim(),
+        student_id:     document.getElementById('cf_sid').value.trim(),
+        course:         document.getElementById('cf_course').value,
+        year_level:     document.getElementById('cf_year').value,
+        password:       document.getElementById('cf_pass').value.trim(),
+    });
+
+    const btn = document.getElementById('createSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Creating…';
+
+    try {
+        const res    = await fetch('/admin/accounts.php', { method:'POST', body });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            sucEl.textContent  = result.message;
+            sucEl.style.display = 'block';
+            // Prepend new card to list
+            const u = result.user;
+            const list = document.getElementById('accountsList');
+            const box  = document.createElement('div');
+            box.className = 'account-box'; box.id = 'acc-' + u.id;
+            box.innerHTML = `
+                <div class="acc-info">
+                    <div class="sid">${u.student_id}</div>
+                    <div class="name">${u.name}</div>
+                    <div class="meta">${u.course} · ${u.year_level}</div>
+                </div>
+                <span class="acc-status status-approved">Approved</span>
+                <div class="acc-actions">
+                    <button class="btn-view" onclick="viewAccount(${u.id})"><i class="fas fa-eye"></i></button>
+                    <button class="btn-del"  onclick="deleteAccount(${u.id}, '${u.name.split(' ')[0]}')"><i class="fas fa-trash"></i></button>
+                </div>`;
+            list.insertBefore(box, list.firstChild);
+            // Reset form after 1.5s then close
+            setTimeout(() => { closeModal('createModal'); }, 1800);
+        } else {
+            errEl.textContent  = result.message;
+            errEl.style.display = 'block';
+        }
+    } catch(e) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Create Account';
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
 </script>
 </body>
 </html>

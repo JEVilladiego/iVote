@@ -12,19 +12,15 @@ $role      = $user['role'];
 $status    = $user['status'];
 $navActive = $navActive ?? '';
 
-// Resolve base paths per role/status
-if ($role === 'admin') {
-    $homeUrl = '/admin/home.php';
-} elseif ($role === 'student') {
-    $homeUrl = '/student/home.php';
-} else {
-    $homeUrl = '/index.php';
-}
+// Home is the same page for everyone
+$homeUrl = '/index.php';
 
 if ($role === 'admin') {
     $dashboardUrl = '/admin/dashboard.php';
+    $homeUrl = '/admin/home.php';
 } elseif ($role === 'student' && $status === 'approved') {
     $dashboardUrl = '/student/dashboard.php';
+    $homeUrl = '/student/home.php';
 } elseif ($role === 'student') {
     // Pending or rejected students have no dashboard yet — send to account page
     $dashboardUrl = '/student/account.php';

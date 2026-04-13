@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->prepare("UPDATE users SET has_voted=1 WHERE id=?")->execute([$user['id']]);
         $_SESSION['has_voted'] = 1;
         setFlash('success', '🎉 Your votes have been cast! Thank you for participating.');
-        echo json_encode(['status'=>'success','redirect'=>'/student/dashboard.php']);
+        echo json_encode(['status'=>'success','redirect'=>'/student/summary.php']);
         exit;
     }
 
@@ -195,6 +195,7 @@ $navActive = 'dashboard';
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cast Your Vote | iVOTE CS</title>
+<link rel="stylesheet" href="/assets/css/shared.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -203,28 +204,41 @@ $navActive = 'dashboard';
   --gold:#c8a84b;--gold-hover:#e8c96b;--white:#f9fbfa;--text-dark:#0e1f14;
   --text-light:#6d9078;--card-bg:#ffffff;
   --shadow:0 4px 20px rgba(18,52,29,0.10);--shadow-hover:0 8px 36px rgba(18,52,29,0.18);
+  /* ── Single source of truth for fixed-bar heights ── */
+  --navbar-h: 72px;
+  --submitbar-h: 44px;
+  --top-offset: calc(var(--navbar-h) + var(--submitbar-h)); /* 116px total */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Geist','DM Sans',sans-serif;background:var(--dark-green);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Header ── */
-header{width:100%;height:72px;background:var(--forest-green);border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;padding:0 40px;position:fixed;top:0;z-index:100;}
-.header-logo{display:flex;align-items:center;gap:14px;}
-.logo-emblem{width:44px;height:44px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dark-green);}
-.logo-emblem img{width:30px;height:30px;object-fit:contain;}
-.header-title{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;color:var(--white);letter-spacing:0.03em;}
-.header-subtitle{font-family:'Montserrat',sans-serif;font-size:10px;color:var(--gold);letter-spacing:0.14em;text-transform:uppercase;margin-top:3px;font-weight:600;}
-.header-right{display:flex;align-items:center;gap:20px;}
-.user-pill{font-family:'Geist',sans-serif;font-size:13px;color:var(--very-light);letter-spacing:0.04em;}
-.user-pill strong{font-family:'Montserrat',sans-serif;color:var(--gold);font-size:12px;font-weight:700;display:block;letter-spacing:0.06em;}
-.submit-btn{padding:10px 24px;background:var(--gold);color:var(--dark-green);border:none;border-radius:6px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+/* ── Layout ── */
+.layout{display:flex;margin-top:var(--top-offset);min-height:calc(100vh - var(--top-offset));}
+
+
+/* ── Ballot submit btn in navbar area ── */
+.ballot-submit-bar{
+  position:fixed;top:var(--navbar-h);right:0;z-index:90;
+  height:var(--submitbar-h);
+  display:flex;align-items:center;gap:14px;
+  padding:0 32px;
+  background:var(--dark-green);
+  border-bottom:1px solid rgba(200,168,75,0.25);
+  width:100%;
+}
+.election-title-bar{
+  font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+  color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;flex:1;
+}
+.submit-btn{
+  padding:10px 24px;background:var(--gold);color:var(--dark-green);border:none;
+  border-radius:6px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;
+  letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;
+}
 .submit-btn:hover{background:var(--gold-hover);}
 
-/* ── Layout ── */
-.layout{display:flex;margin-top:72px;min-height:calc(100vh - 72px);}
-
 /* ── Sidebar ── */
-aside{width:272px;min-width:272px;background:var(--forest-green);border-right:1px solid rgba(200,168,75,0.2);padding:28px 16px;position:fixed;top:72px;bottom:0;overflow-y:auto;}
+aside{width:272px;min-width:272px;background:var(--forest-green);border-right:1px solid rgba(200,168,75,0.2);padding:28px 16px;position:fixed;top:var(--top-offset);bottom:0;overflow-y:auto;}
 .sidebar-heading{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:16px;padding:0 8px;}
 .sidebar-divider{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--light-sage);font-weight:700;padding:16px 8px 8px;opacity:0.75;}
 .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;margin-bottom:4px;border:1px solid transparent;transition:background 0.22s,border-color 0.22s,transform 0.15s;}
@@ -323,24 +337,16 @@ main{margin-left:272px;flex:1;padding:36px 40px;background:var(--page-bg);}
 </head>
 <body>
 
-<header>
-  <div class="header-logo">
-    <div class="logo-emblem">
-      <img src="/assets/img/logo.png" alt="Logo" onerror="this.style.display='none'">
-    </div>
-    <div>
-      <div class="header-title">College of Science Electoral Commission</div>
-      <div class="header-subtitle">Official Election · <?= htmlspecialchars($election['title']) ?></div>
-    </div>
+<?php require_once __DIR__ . '/../includes/navbar.php'; ?>
+
+<div class="ballot-submit-bar">
+  <div class="election-title-bar">
+    🗳️ Official Election &nbsp;·&nbsp; <?= htmlspecialchars($election['title']) ?>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    Voting as: <strong style="color:#fff"><?= htmlspecialchars($user['first_name'] . ' ' . $user['student_id']) ?></strong>
   </div>
-  <div class="header-right">
-    <div class="user-pill">
-      <strong><?= htmlspecialchars($user['first_name'] . ' ' . ($user['student_id'])) ?></strong>
-      Voting Period Active
-    </div>
-    <button class="submit-btn" onclick="handleFinalSubmit()">Submit Ballot</button>
-  </div>
-</header>
+  <button class="submit-btn" onclick="handleFinalSubmit()">Submit Ballot</button>
+</div>
 
 <div class="layout">
 
@@ -780,23 +786,11 @@ function handleFinalSubmit() {
 
 async function finalizeBallot() {
     closeModal('submitModal');
-    const fd = new FormData();
-    fd.append('action',         'finalize');
-    fd.append('election_id',    ELECTION_ID);
-    fd.append('abstained_count', Object.keys(abstainMap).length);
-    fd.append('csrf_token',     CSRF_TOKEN);
 
-    try {
-        const res  = await fetch(window.location.href, {method:'POST', body:fd});
-        const data = await res.json();
-        if (data.status === 'success') {
-            window.location.href = data.redirect || '/student/dashboard.php';
-        } else if (data.status === 'incomplete') {
-            document.getElementById('warnModal').classList.add('visible');
-        } else {
-            alert(data.message || 'An error occurred.');
-        }
-    } catch(e) { alert('Network error. Please try again.'); }
+    // Persist abstain selections so summary.php can display them
+    try { sessionStorage.setItem('abstainMap', JSON.stringify(abstainMap)); } catch(e) {}
+
+    window.location.href = '/student/summary.php';
 }
 
 function closeModal(id) {
