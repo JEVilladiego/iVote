@@ -1,0 +1,17 @@
+# Project Tasks
+- STUDENT
+    - [ ] pending.php not touched yet, to be removed soon due to new registration process.
+    - [ ] dashboard.php ("My Vote" mark not properly displaying)
+    - [ ] dashboard.php (Print full formatting)
+    - [ ] home.php not yet appropriated (copy/paste onting modify na lang)
+    - [ ] vote.php some navbar overlap
+
+- ADMIN
+    - [ ] home.php not yet appropriated (copy/paste onting modify na lang)
+    - [ ] haven't deleted the verification.php yet, but already removed from the system features.
+
+- DATABASE
+    - [ ] haven't inserted ALL user data yet.
+
+- [ ] index.php still has redirect to register, which is to be removed.
+
