@@ -41,7 +41,7 @@ chmod 755 uploads/documents/
 ## File Structure
 ```
 ivote/
-├── schema.sql                  ← Run once in MySQL
+├── schema.sql (now ivote_cs.sql)                  ← Run once in MySQL
 ├── index.php                   ← Guest homepage
 ├── login.php                   ← Login + Register
 ├── logout.php                  ← Session destroyer
@@ -66,6 +66,7 @@ ivote/
 │   ├── dashboard.php           ← Student home + live results
 │   ├── vote.php                ← Ballot casting page
 │   └── account.php             ← Profile + document upload
+│   │__ summary.php             ← Ballot finalizing page
 │
 ├── assets/
 │   ├── css/shared.css          ← Global styles (navbar, sidebar, etc.)
