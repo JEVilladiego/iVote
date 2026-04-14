@@ -464,7 +464,7 @@ $navActive = 'dashboard';
     }
 
     .my-pick-badge {
-      position: absolute; top: 10px; right: 10px; z-index: 2;
+      position: absolute; top: -10px; right: -60%; z-index: 2;
       background: #1a7a30; color: #fff;
       font-size: 0.65rem; font-weight: 800;
       letter-spacing: 0.06em; text-transform: uppercase;
@@ -1133,8 +1133,157 @@ $navActive = 'dashboard';
   }
 
   function printWinners()  { openPrintWindow('winnersPrintSection', 'Elected Officers — iVOTE CS'); }
-  function printFull()     { window.print(); }
   function printMyVotes()  { openPrintWindow('myVotesPrintSection', 'My Vote Summary — iVOTE CS'); }
+
+  function printFull() {
+    const win = window.open('', '_blank', 'width=960,height=760');
+    const positions = <?= json_encode(array_map(fn($p) => ['id' => $p['id'], 'title' => $p['title'], 'vote_count' => $p['vote_count']], $positions)) ?>;
+    const candidates = <?= json_encode($candidatesByPos) ?>;
+    const myVotes    = <?= json_encode($myVotes) ?>;
+    const elecTitle  = <?= json_encode($election['title']) ?>;
+    const elecStart  = <?= json_encode(date('F d, Y', strtotime($election['start_date']))) ?>;
+    const elecEnd    = <?= json_encode(date('F d, Y', strtotime($election['end_date']))) ?>;
+    const genDate    = <?= json_encode(date('F d, Y')) ?>;
+    const totalVoters = <?= (int)$stats['voters'] ?>;
+    const totalVotes  = <?= (int)$stats['votes'] ?>;
+    const turnout     = <?= $turnout ?>;
+    const voterName   = <?= json_encode($student['name'] ?? 'Student') ?>;
+
+    // Build candidate rows
+    let positionRows = '';
+    positions.forEach(pos => {
+      const cands = candidates[pos.id] || [];
+      const posTotal = cands.reduce((s, c) => s + parseInt(c.votes || 0), 0);
+      const myPick = myVotes[pos.id] ? myVotes[pos.id].candidate_id : null;
+      const suffixes = ['st','nd','rd'];
+      const rankStyles = ['#12341d','#2d6a4f','#52796f'];
+
+      positionRows += `<tr class="pos-header-row"><td colspan="5">${pos.title}
+        <span class="pos-votes-note">${pos.vote_count} vote${pos.vote_count != 1 ? 's' : ''} cast</span></td></tr>`;
+
+      if (cands.length === 0) {
+        positionRows += `<tr><td colspan="5" style="color:#94a3b8;padding:8px 10px;font-size:8.5pt;">No candidates registered.</td></tr>`;
+      } else {
+        cands.forEach((c, rank) => {
+          const pct = posTotal > 0 ? Math.round(c.votes / posTotal * 1000) / 10 : 0;
+          const rankN = rank + 1;
+          const suffix = suffixes[Math.min(rankN - 1, 2)] || 'th';
+          const isMyPick = (myPick && parseInt(myPick) === parseInt(c.id));
+          const isLeader = rank === 0;
+          const rowClass = isMyPick ? ' my-row' : (isLeader ? ' lead-row' : '');
+          positionRows += `<tr class="${rowClass}">
+            <td class="td-num">${rankN}<sup>${suffix}</sup></td>
+            <td class="td-name">${c.name}${isMyPick ? '<span class="td-badge voted">✓ MY VOTE</span>' : ''}${isLeader ? '<span class="td-badge lead">🏆 Leading</span>' : ''}</td>
+            <td class="td-course">${c.course}${c.partylist ? `<span class="td-sid">${c.partylist}</span>` : ''}</td>
+            <td class="td-pct">${pct}%</td>
+            <td class="td-votes"><strong>${c.votes}</strong></td>
+          </tr>`;
+        });
+      }
+    });
+
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Full Results — iVOTE CS</title>
+      <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Geist', Arial, sans-serif; background: #fff; color: #0f172a; padding: 18mm; }
+        @page { size: A4 portrait; margin: 14mm 18mm 20mm; }
+        @media print { body { padding: 0; } }
+
+        .doc-header { text-align: center; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2.5px solid #12341d; }
+        .doc-logo { width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto 10px; }
+        .doc-orgname { font-family: 'Montserrat', Arial, sans-serif; font-size: 14pt; font-weight: 900; color: #12341d; margin: 0 0 2px; text-transform: uppercase; letter-spacing: 0.6px; }
+        .doc-elec-title { font-family: 'Montserrat', Arial, sans-serif; font-size: 10.5pt; font-weight: 800; color: #33553e; margin: 0 0 5px; }
+        .doc-meta { font-size: 7.5pt; color: #64748b; margin: 0; }
+
+        .doc-certified { background: #f0fdf4; border: 1.5px solid #6ee7b7; border-radius: 6px; padding: 7px 14px; margin: 14px 0 14px; text-align: center; font-size: 8.5pt; color: #065f46; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; }
+
+        .summary-row { display: flex; gap: 12px; margin-bottom: 18px; }
+        .summary-box { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
+        .summary-box .s-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-family: 'Montserrat', sans-serif; font-weight: 800; margin-bottom: 4px; }
+        .summary-box .s-value { font-family: 'Montserrat', sans-serif; font-size: 16pt; font-weight: 900; color: #12341d; }
+        .summary-box .s-sub { font-size: 7pt; color: #94a3b8; margin-top: 2px; }
+        .turnout-bar { height: 8px; background: #e2e8f0; border-radius: 4px; margin: 8px 0 4px; }
+        .turnout-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #12341d, #33553e, #6d9078); }
+
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .doc-table thead tr { border-bottom: 1.5px solid #12341d; }
+        .doc-table th { color: #64748b; font-family: 'Montserrat', Arial, sans-serif; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 7px 8px; text-align: left; }
+        .doc-table td { padding: 7px 8px; font-size: 8.5pt; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        .pos-header-row td { background: #f8fafc; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 8.5pt; color: #12341d; padding: 8px 8px 6px; border-bottom: 1px solid #e2e8f0; border-top: 6px solid #fff; }
+        .pos-votes-note { font-weight: 400; font-size: 7.5pt; color: #94a3b8; margin-left: 8px; }
+        .doc-table tbody tr:last-child td { border-bottom: none; }
+
+        .td-num { color: #94a3b8; font-size: 8pt; white-space: nowrap; }
+        .td-num sup { font-size: 6pt; }
+        .td-name { font-weight: 600; font-size: 8.5pt; }
+        .td-course { font-size: 8pt; color: #475569; }
+        .td-sid { font-size: 7pt; color: #94a3b8; display: block; }
+        .td-pct { font-size: 8pt; color: #475569; white-space: nowrap; }
+        .td-votes { font-size: 9pt; text-align: right; white-space: nowrap; }
+        .td-votes strong { font-family: 'Montserrat', sans-serif; font-weight: 900; color: #12341d; }
+
+        .td-badge { display: inline-block; border-radius: 20px; padding: 1px 7px; font-size: 6pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; vertical-align: middle; margin-left: 5px; font-family: 'Montserrat', sans-serif; }
+        .td-badge.voted { background: #d1fae5; color: #065f46; }
+        .td-badge.lead  { background: #fef3c7; color: #92400e; }
+
+        .my-row td  { background: #f0fdf4; }
+        .lead-row td { background: #fffbeb; }
+
+        .doc-footer { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 7pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding: 5px 18mm 3px; background: #fff; }
+        .voter-note { font-size: 7.5pt; color: #475569; margin-top: 6px; font-style: italic; }
+      </style>
+    </head><body>
+      <div class="doc-header">
+        <img class="doc-logo" src="/assets/img/icons/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <p class="doc-orgname">College of Science Association (COSA)</p>
+        <p class="doc-elec-title">${elecTitle} — Full Election Results</p>
+        <p class="doc-meta">Election Period: ${elecStart} – ${elecEnd} &nbsp;|&nbsp; Document Generated: ${genDate}</p>
+      </div>
+      <div class="doc-certified">
+        📊 &nbsp;Complete candidate rankings for all positions based on the final vote tally.
+        ${myVotes && Object.keys(myVotes).length ? ' Your selections are marked <strong>MY VOTE</strong>.' : ''}
+      </div>
+      <div class="summary-row">
+        <div class="summary-box">
+          <div class="s-label">Eligible Voters</div>
+          <div class="s-value">${totalVoters}</div>
+          <div class="s-sub">Registered students</div>
+        </div>
+        <div class="summary-box">
+          <div class="s-label">Votes Submitted</div>
+          <div class="s-value">${totalVotes}</div>
+          <div class="s-sub">Recorded ballots</div>
+        </div>
+        <div class="summary-box" style="flex:2">
+          <div class="s-label">Voter Turnout — ${turnout}%</div>
+          <div class="turnout-bar"><div class="turnout-fill" style="width:${turnout}%"></div></div>
+          <div class="s-sub">${turnout}% of eligible voters participated</div>
+          ${voterName ? `<div class="voter-note">Printed by: ${voterName}</div>` : ''}
+        </div>
+      </div>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th style="width:5%">Rank</th>
+            <th style="width:32%">Candidate</th>
+            <th style="width:28%">Course / Party</th>
+            <th style="width:10%">Share</th>
+            <th style="width:10%;text-align:right">Votes</th>
+          </tr>
+        </thead>
+        <tbody>${positionRows}</tbody>
+      </table>
+      <div class="doc-footer">
+        <span>College of Science Association (COSA)</span>
+        <span>System-generated by iVOTE CS &nbsp;|&nbsp; Confidential</span>
+        <span>${elecTitle}</span>
+      </div>
+    </body></html>`);
+    win.document.close();
+    win.onload = () => win.print();
+  }
   <?php endif; ?>
   
   </script>
