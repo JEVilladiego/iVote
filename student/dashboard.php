@@ -241,30 +241,40 @@ $navActive = 'dashboard';
 
     /* ── Countdown ── */
     .countdown-card {
-      background: rgba(247,251,248,0.82);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(51,85,62,0.1);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-soft);
-      padding: 24px 28px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      width: 100%;
+      max-width: 560px;
+      margin: 18px auto 0;
     }
+
+    .countdown-inline { margin-top: 24px; }
 
     .countdown-card .section-label {
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.88rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--forest); margin-bottom: 16px;
+      font-size: 0.82rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--deep); margin-bottom: 8px;
     }
 
-    .cd-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .countdown-duration {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      color: rgba(18,52,29,0.72);
+      margin-bottom: 14px;
+    }
+
+    .cd-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
     .cd-block {
-      flex: 1; min-width: 72px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(51,85,62,0.1);
-      border-radius: var(--radius-md);
-      padding: 14px 10px; text-align: center;
-      box-shadow: var(--shadow-soft);
+      flex: 1; min-width: 62px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(18,52,29,0.12);
+      border-radius: 20px;
+      padding: 12px 8px; text-align: center;
+      box-shadow: 0 10px 20px rgba(18,52,29,0.05);
     }
 
     .cd-num { font-family: 'Montserrat', sans-serif; font-size: 2rem; font-weight: 900; color: var(--deep); display: block; line-height: 1; }
@@ -323,19 +333,44 @@ $navActive = 'dashboard';
 
     /* ── Voted confirmation banner (ongoing, already voted) ── */
     .voted-banner {
-      background: rgba(247,251,248,0.82);
-      backdrop-filter: blur(14px);
-      border: 2px solid rgba(51,170,80,0.3);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-soft);
-      padding: 24px 28px;
-      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 999px;
+      padding: 8px 18px;
+      box-shadow: 0 12px 32px rgba(245, 158, 11, 0.3), 0 4px 8px rgba(0, 0, 0, 0.08);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #92400e;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      z-index: 2;
+      transform: rotate(0.5deg);
     }
 
-    .voted-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .voted-banner::before {
+      content: '✔';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+    }
 
-    .voted-text h3 { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
-    .voted-text p { font-size: 0.9rem; color: rgba(18,52,29,0.7); line-height: 1.6; }
+    .ongoing-card { position: relative; }
 
     /* ── Ongoing donut card ── */
     .ongoing-wrap { display: grid; place-items: center; }
@@ -355,22 +390,22 @@ $navActive = 'dashboard';
     .ongoing-card p { max-width: 620px; margin: 0 auto; font-size: 0.96rem; line-height: 1.7; color: rgba(18,52,29,0.72); }
     .session-meta { margin-top: 12px; font-size: 0.9rem; font-weight: 600; color: rgba(18,52,29,0.68); }
 
-    .donut-panel { margin-top: 30px; display: grid; gap: 20px; place-items: center; }
+    .donut-panel { margin-top: 30px; display: grid; gap: 24px; place-items: center; }
 
-    .donut-shell { position: relative; width: min(320px, 72vw); aspect-ratio: 1; display: grid; place-items: center; }
+    .donut-shell { position: relative; width: min(420px, 78vw); aspect-ratio: 1; display: grid; place-items: center; }
 
     .donut-chart {
       width: 100%; height: 100%; border-radius: 50%;
       background:
-        radial-gradient(closest-side, rgba(247,251,248,1) 71%, transparent 72%),
+        radial-gradient(closest-side, rgba(247,251,248,1) 68%, transparent 70%),
         conic-gradient(var(--deep) 0deg <?= $donutAngle ?>deg, rgba(109,144,120,0.28) <?= $donutAngle ?>deg 360deg);
-      box-shadow: inset 0 0 0 14px rgba(255,255,255,0.28), var(--shadow-soft);
+      box-shadow: inset 0 0 0 16px rgba(255,255,255,0.28), var(--shadow-soft);
     }
 
     .donut-center { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
-    .donut-center div { width: 55%; text-align: center; }
-    .donut-center strong { font-family: 'Montserrat', sans-serif; font-size: clamp(1.8rem,1.2rem + 1.4vw,2.8rem); display: block; line-height: 1; margin-bottom: 6px; }
-    .donut-center span { font-size: 0.8rem; color: rgba(18,52,29,0.68); font-weight: 600; }
+    .donut-center div { width: 52%; text-align: center; }
+    .donut-center strong { font-family: 'Montserrat', sans-serif; font-size: clamp(2.2rem,1.4rem + 1.6vw,3.4rem); display: block; line-height: 1; margin-bottom: 6px; }
+    .donut-center span { font-size: 0.9rem; color: rgba(18,52,29,0.68); font-weight: 600; }
 
     .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 6px; }
     .legend-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.7); padding: 11px 16px; border-radius: 999px; border: 1px solid rgba(51,85,62,0.08); box-shadow: var(--shadow-soft); }
@@ -608,78 +643,8 @@ $navActive = 'dashboard';
 
     <?php else: ?>
 
-    <!-- ── Hero banner ── -->
-    <div class="hero-banner print-hidden">
-      <div class="hero-left">
-        <div class="eyebrow">
-          <?php if ($isOngoing): ?>🟢 Election Ongoing
-          <?php elseif ($isEnded): ?>🏁 Election Ended
-          <?php else: ?>📅 Election Upcoming<?php endif; ?>
-        </div>
-        <h1><?= htmlspecialchars($election['title']) ?></h1>
-        <p>
-          <?= date('M d, Y', strtotime($election['start_date'])) ?> &ndash;
-          <?= date('M d, Y', strtotime($election['end_date'])) ?>
-          &nbsp;&nbsp;|&nbsp;&nbsp; Hello, <strong><?= htmlspecialchars($student['name'] ?? 'Student') ?></strong>.
-        </p>
-      </div>
-
-      <div class="hero-right">
-        <div class="status-chip accent">
-          <div class="chip-label">Status</div>
-          <div class="chip-value"><?= ucfirst($election['status']) ?></div>
-        </div>
-        <div class="status-chip">
-          <div class="chip-label">Voter Turnout</div>
-          <div class="chip-value"><?= $turnout ?>%</div>
-        </div>
-        <div class="status-chip">
-          <div class="chip-label">Votes Cast</div>
-          <div class="chip-value"><?= number_format($stats['votes']) ?></div>
-        </div>
-        <div class="status-chip <?= $hasVoted ? 'voted-chip' : '' ?>">
-          <div class="chip-label">My Vote</div>
-          <div class="chip-value"><?= $hasVoted ? '✔ Submitted' : 'Pending' ?></div>
-        </div>
-      </div>
-    </div>
 
     <?php if ($isOngoing): ?>
-    <!-- ── Countdown ── -->
-    <div class="countdown-card print-hidden">
-      <div class="section-label">⏳ Time Remaining Until Election Closes</div>
-      <div class="cd-row" id="countdown">
-        <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Days</span></div>
-        <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Hours</span></div>
-        <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Mins</span></div>
-        <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Secs</span></div>
-      </div>
-    </div>
-
-    <!-- ── Stats row ── -->
-    <div class="stats-row print-hidden">
-      <div class="stat-tile">
-        <div class="tile-label">Registered Voters</div>
-        <div class="tile-value"><?= number_format($stats['voters']) ?></div>
-        <div class="tile-sub">Eligible to vote</div>
-      </div>
-      <div class="stat-tile">
-        <div class="tile-label">Votes Cast</div>
-        <div class="tile-value"><?= number_format($stats['votes']) ?></div>
-        <div class="tile-sub"><?= $turnout ?>% turnout</div>
-      </div>
-      <div class="stat-tile">
-        <div class="tile-label">Positions</div>
-        <div class="tile-value"><?= $stats['positions'] ?></div>
-        <div class="tile-sub">Open seats</div>
-      </div>
-      <div class="stat-tile">
-        <div class="tile-label">Candidates</div>
-        <div class="tile-value"><?= $stats['candidates'] ?></div>
-        <div class="tile-sub">Running this election</div>
-      </div>
-    </div>
-
     <?php if (!$hasVoted): ?>
     <!-- ── Vote CTA ── -->
     <div class="vote-cta print-hidden">
@@ -689,24 +654,29 @@ $navActive = 'dashboard';
       </div>
       <a href="/student/vote.php" class="vote-now-btn">Vote Now →</a>
     </div>
-    <?php else: ?>
-    <!-- ── Already voted banner ── -->
-    <div class="voted-banner print-hidden">
-      <div class="voted-icon">✅</div>
-      <div class="voted-text">
-        <h3>Your ballot has been successfully submitted.</h3>
-        <p>Thank you for participating! Your vote has been recorded. Final results will be published once the election closes.</p>
-      </div>
-    </div>
     <?php endif; ?>
 
     <!-- ── Ongoing donut ── -->
     <div class="ongoing-wrap print-hidden">
       <div class="ongoing-card">
+        <?php if ($hasVoted): ?>
+          <div class="voted-banner print-hidden">Vote Casted</div>
+        <?php endif; ?>
         <div class="eyebrow">Election Session in Progress</div>
         <h2>Voting is currently open. Results will be revealed once the session ends.</h2>
         <p>The dashboard shows live participation progress while the election is active. Final candidate rankings and official vote summaries will be published once voting closes.</p>
         <div class="session-meta"><?= htmlspecialchars($election['title']) ?></div>
+
+        <div class="countdown-card print-hidden countdown-inline">
+          <div class="section-label">⏳ Time Remaining Until Election Closes</div>
+          <div class="countdown-duration">Election period: <?= htmlspecialchars(date('F j, Y', strtotime($election['start_date']))) ?> – <?= htmlspecialchars(date('F j, Y', strtotime($election['end_date']))) ?></div>
+          <div class="cd-row" id="countdown">
+            <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Days</span></div>
+            <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Hours</span></div>
+            <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Mins</span></div>
+            <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Secs</span></div>
+          </div>
+        </div>
 
         <div class="donut-panel">
           <div class="donut-shell">
@@ -740,7 +710,7 @@ $navActive = 'dashboard';
     <!-- Print header (only shows on print) -->
     <div class="print-header" style="display:none;">
       <h2>iVOTE CS — Official Election Results</h2>
-      <p><?= htmlspecialchars($election['title']) ?> &nbsp;|&nbsp; Ended <?= date('F d, Y', strtotime($election['end_date'])) ?> &nbsp;|&nbsp; <?= htmlspecialchars($student['name'] ?? 'Student') ?></p>
+      <p><?= htmlspecialchars($election['title']) ?> &nbsp;|&nbsp; Ended <?= date('F d, Y', strtotime($election['end_date'])) ?> &nbsp;|&nbsp; <?= htmlspecialchars($student['first_name'] ?? 'Student') ?></p>
     </div>
 
     <!-- Election summary card -->
@@ -986,7 +956,7 @@ $navActive = 'dashboard';
   <?php if ($hasVoted && !empty($myVotes)): ?>
   <div id="myVotesPrintSection" style="display:none;">
     <div class="doc-header">
-      <img class="doc-logo" src="/assets/img/icons/logo.png" alt="Logo" onerror="this.style.display:'none'">
+      <img class="doc-logo" src="/assets/img/icons/logo.png" alt="Logo" onerror="this.style.display; 'none'">
       <p class="doc-orgname">College of Science Association (COSA)</p>
       <p class="doc-elec-title"><?= htmlspecialchars($election['title']) ?> — Personal Vote Summary</p>
       <p class="doc-meta">
@@ -999,7 +969,7 @@ $navActive = 'dashboard';
       </p>
     </div>
     <div class="doc-certified">
-      🗳️ &nbsp;Personal ballot record for <strong><?= htmlspecialchars($student['name'] ?? 'Student') ?></strong>
+      🗳️ &nbsp;Personal ballot record for <strong><?= htmlspecialchars($student['first_name'] ?? 'Student') ?></strong>
       &nbsp;|&nbsp; <?= htmlspecialchars($student['student_id'] ?? '') ?>
       <?php if (!empty($student['course'])): ?> &nbsp;|&nbsp; <?= htmlspecialchars($student['course']) ?><?php endif; ?>
     </div>
@@ -1147,7 +1117,7 @@ $navActive = 'dashboard';
     const totalVoters = <?= (int)$stats['voters'] ?>;
     const totalVotes  = <?= (int)$stats['votes'] ?>;
     const turnout     = <?= $turnout ?>;
-    const voterName   = <?= json_encode($student['name'] ?? 'Student') ?>;
+    const voterName   = <?= json_encode($student['first_name'] ?? 'Student') ?>;
 
     // Build candidate rows
     let positionRows = '';

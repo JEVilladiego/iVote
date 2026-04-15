@@ -272,6 +272,7 @@ body{font-family:'Geist','DM Sans',sans-serif;background:var(--dark-green);color
   background:var(--dark-green);
   border-bottom:1px solid rgba(200,168,75,0.25);
   width:100%;
+  padding: 2%;
 }
 .election-title-bar{
   font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
