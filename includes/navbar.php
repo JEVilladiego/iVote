@@ -34,6 +34,7 @@ function navLink(string $href, string $label, string $active, string $key): stri
     $cls = ($active === $key) ? 'nav-link active' : 'nav-link';
     return "<a href=\"$href\" class=\"$cls\">$label</a>";
 }
+
 ?>
 <nav class="navbar">
     <a href="<?= $homeUrl ?>" class="nav-logo">
@@ -55,12 +56,11 @@ function navLink(string $href, string $label, string $active, string $key): stri
         <?= navLink($aboutUrl, 'About', $navActive, 'about') ?>
     </div>
 
-    <?php if ($role === 'guest' || !isLoggedIn()): ?>
-    <!-- GUEST: plain Login button -->
+ <?php if ($role === 'guest' || !isLoggedIn()): ?>
     <div class="nav-auth">
-        <button class="btn-login-oval" onclick="document.getElementById('authModal').style.display='flex'">
+        <a href="/login.php" class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/login.php') echo ' active'; ?>" style="text-decoration: none; display: inline-block;">
             Log In
-        </button>
+        </a>
     </div>
 
     <?php elseif ($role === 'student'): ?>
