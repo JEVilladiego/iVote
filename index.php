@@ -60,6 +60,7 @@ $navActive = 'home';
         }
         .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
         .btn-hero-primary {
+            display: inline-flex; align-items: center; justify-content: center;
             font-family: 'Montserrat', sans-serif; background: #fff; color: #12341d;
             padding: 16px 36px; border-radius: 50px; font-weight: 800; font-size: 15px;
             border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
@@ -67,6 +68,7 @@ $navActive = 'home';
         }
         .btn-hero-primary:hover { background: #d5e8db; transform: translateY(-3px); }
         .btn-hero-secondary {
+            display: inline-flex; align-items: center; justify-content: center;
             font-family: 'Montserrat', sans-serif;
             background: rgba(255,255,255,0.15); color: #fff;
             padding: 16px 36px; border-radius: 50px; font-weight: 700; font-size: 15px;
@@ -111,20 +113,18 @@ $navActive = 'home';
 
 <?php require_once __DIR__ . '/includes/navbar.php'; ?>
 
-<!-- HERO -->
 <section class="hero">
     <div class="hero-content">
         <div class="hero-badge"><span>COSA Election 2026-2027</span></div>
         <h1>Your Vote.<br>Your Voice. Your Future.</h1>
         <p>The official secure online voting platform for the COS Student Organization. Cast your ballot from anywhere — fast, transparent, and tamper-proof.</p>
         <div class="hero-btns">
-            <button class="btn-hero-primary" onclick="openAuthModal()">Log In to Vote</button>
+            <a href="/login.php" class="btn-hero-primary">Log In to Vote</a>
             <a href="/about.php" class="btn-hero-secondary">Meet the Team</a>
         </div>
     </div>
 </section>
 
-<!-- STEPS -->
 <section class="steps-section">
     <div class="section-header">
         <h2>How to Vote</h2>
@@ -133,28 +133,28 @@ $navActive = 'home';
     <div class="steps-grid">
         <div class="step-card">
             <div class="step-number">1</div>
-            <h3>Register</h3>
-            <p>Create your account using your official Student ID. Fill in your details and submit a verification document.</p>
+            <h3>Get Your Account</h3>
+            <p>Your official voting credentials will be securely provided to you by the Super Admin.</p>
         </div>
         <div class="step-card">
             <div class="step-number">2</div>
-            <h3>Get Verified</h3>
-            <p>An admin reviews your registration and COR/School ID. You'll gain access once approved.</p>
+            <h3>Log In</h3>
+            <p>Access the portal using your official Student ID and password during the active election period.</p>
         </div>
         <div class="step-card">
             <div class="step-number">3</div>
             <h3>Cast Your Vote</h3>
-            <p>Log in during the election period, review candidates for each position, and submit your choices.</p>
+            <p>Review the candidates running for each position, make your selections, and submit your ballot.</p>
         </div>
         <div class="step-card">
             <div class="step-number">4</div>
             <h3>View Results</h3>
-            <p>Watch live results on the dashboard as votes are counted in real time.</p>
+            <p>Watch the live, transparent results on the dashboard as votes are counted in real-time.</p>
         </div>
     </div>
 </section>
 
-<!-- GUEST AUTH MODAL -->
+<!-- GUEST AUTH MODAL
 <div class="modal-overlay" id="authModal">
     <div class="modal-card">
         <h2>Access iVOTE CS</h2>
@@ -165,14 +165,8 @@ $navActive = 'home';
         </div>
         <span class="close-link" onclick="closeAuthModal()">Close</span>
     </div>
-</div>
+</div> -->
 
 <script src="/assets/js/shared.js"></script>
-<script>
-// If linked from register button, open register view on login.php
-if (sessionStorage.getItem('showRegister') === '1') {
-    sessionStorage.removeItem('showRegister');
-}
-</script>
 </body>
 </html>
