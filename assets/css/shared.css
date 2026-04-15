@@ -62,6 +62,10 @@ body { font-family: 'Geist', sans-serif; }
     transition: all 0.3s ease;
 }
 .btn-login-oval:hover { background: #f1f5f9; transform: translateY(-2px); }
+.btn-login-oval.active {
+    background-color: #33553e;
+    color: white;
+}
 
 /* User dropdown */
 .user-menu-container { position: relative; display: flex; align-items: center; }
@@ -147,8 +151,8 @@ body { font-family: 'Geist', sans-serif; }
 
 /* Admin sidebar */
 .sidebar {
-    position: fixed; top: 80px; left: 0;
-    width: 280px; height: calc(100vh - 80px);
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
     background: #fff; border-right: 1px solid #e2e8f0;
     display: flex; flex-direction: column; padding: 30px 20px;
     box-shadow: 4px 0 15px rgba(0,0,0,0.03); z-index: 900;
