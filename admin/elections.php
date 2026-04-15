@@ -115,9 +115,10 @@ $flash         = getFlash();
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Elections | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <base href="/ivote/">
     <link rel="stylesheet" href="/assets/css/shared.css">
     <style>
-        body { background:#f8fafc; padding-top:80px; }
+        body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
         .main { flex:1; margin-left:280px; padding:40px; }
         .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
@@ -210,7 +211,7 @@ $flash         = getFlash();
     </style>
 </head>
 <body>
-<?php $navActive='dashboard'; require_once __DIR__ . '/../includes/navbar.php'; ?>
+<?php // $navActive='dashboard'; require_once __DIR__ . '/../includes/navbar.php'; ?>
 <div class="page-wrap">
     <?php require_once __DIR__ . '/../includes/admin_sidebar.php'; ?>
     <main class="main">

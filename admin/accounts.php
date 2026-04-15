@@ -123,9 +123,10 @@ $sidebarActive = 'accounts';
     <title>Manage Accounts | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <base href="/ivote/">
     <link rel="stylesheet" href="/assets/css/shared.css">
     <style>
-        body { background:#f8fafc; padding-top:80px; }
+        body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
         .main { flex:1; margin-left:280px; padding:40px; }
         h2 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.6rem; font-weight:800; margin-bottom:20px; }
@@ -224,7 +225,7 @@ $sidebarActive = 'accounts';
     </style>
 </head>
 <body>
-<?php require_once __DIR__ . '/../includes/navbar.php'; ?>
+<?php // require_once __DIR__ . '/../includes/navbar.php'; ?>
 
 <div class="page-wrap">
     <?php require_once __DIR__ . '/../includes/admin_sidebar.php'; ?>

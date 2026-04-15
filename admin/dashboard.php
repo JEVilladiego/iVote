@@ -72,11 +72,12 @@ $printDate  = date('F d, Y');
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <base href="/ivote/">
     <link rel="stylesheet" href="/assets/css/shared.css">
     <style>
-        body { background:#f8fafc; padding-top:80px; }
+        body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
-        .main { flex:1; margin-left:280px; padding:40px; min-height:calc(100vh - 80px); }
+        .main { flex:1; margin-left:280px; padding:40px; min-height:100vh; }
         h1 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.8rem; font-weight:900; margin-bottom:6px; }
         .sub { color:#33553e; margin-bottom:30px; font-size:0.95rem; }
 
@@ -169,10 +170,11 @@ $printDate  = date('F d, Y');
         .action-name { font-family:'Montserrat',sans-serif; font-weight:800; font-size:0.95rem; }
         .action-desc { font-size:0.78rem; opacity:0.75; margin-top:4px; }
 
-        /* ═══════════════════════════════════════════
-           PRINTABLE DOCUMENT
-           Hidden on screen. Only shown when printing.
-        ═══════════════════════════════════════════ */
+        /* Sidebar adjustments */
+        .sidebar .nav-logo { color: #12341d; text-decoration: none; margin-bottom: 20px; }
+        .sidebar .logo-icon { background: #d5e8db; width: 50px; height: 50px; border-radius: 50%; border: 2px solid #12341d; }
+        .sidebar .logo-text { font-size: 18px; }
+        .sidebar-logout { margin-top: auto; padding-top: 20px; border-top: 1px solid #e2e8f0; }
         #printDoc { display:none; }
 
         @media print {
@@ -197,24 +199,29 @@ $printDate  = date('F d, Y');
             /* Header */
             .doc-header {
                 text-align:center;
-                padding-bottom:16px;
-                margin-bottom:20px;
-                border-bottom:2.5px solid #12341d;
+                padding:24px 20px 20px;
+                margin-bottom:24px;
+                border-bottom:3px solid #12341d;
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border-radius: 8px;
             }
             .doc-logo {
-                width:72px; height:72px; object-fit:contain;
-                margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;
+                width:80px; height:80px; object-fit:contain;
+                margin-bottom:12px; display:block; margin-left:auto; margin-right:auto;
+                border-radius:50%; border:3px solid #12341d; background:#fff; padding:4px;
             }
             .doc-orgname {
                 font-family:'Montserrat', Arial, sans-serif;
-                font-size:13pt; font-weight:900; color:#12341d;
-                margin:0 0 3px; text-transform:uppercase; letter-spacing:0.5px;
+                font-size:14pt; font-weight:900; color:#12341d;
+                margin:0 0 6px; text-transform:uppercase; letter-spacing:0.8px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             }
             .doc-elec-title {
                 font-family:'Montserrat', Arial, sans-serif;
-                font-size:11pt; font-weight:800; color:#33553e; margin:0 0 4px;
+                font-size:12pt; font-weight:800; color:#33553e; margin:0 0 8px;
+                letter-spacing:0.3px;
             }
-            .doc-meta { font-size:8pt; color:#64748b; margin:0; }
+            .doc-meta { font-size:9pt; color:#64748b; margin:0; font-weight:600; }
 
             /* Certified banner */
             .doc-certified {
@@ -276,7 +283,7 @@ $printDate  = date('F d, Y');
     </style>
 </head>
 <body>
-<?php require_once __DIR__ . '/../includes/navbar.php'; ?>
+<?php // require_once __DIR__ . '/../includes/navbar.php'; ?>
 
 <div class="page-wrap">
     <?php require_once __DIR__ . '/../includes/admin_sidebar.php'; ?>
