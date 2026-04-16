@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'user'    => [
                 'id' => $newId, 'student_id' => $sid,
                 'name' => "$fname $lname", 'course' => $course,
-                'year_level' => $year, 'status' => 'approved',
+                'year_level' => $year,
             ]
         ]); exit;
     }
@@ -260,7 +260,6 @@ $sidebarActive = 'accounts';
                     <div class="name"><?= htmlspecialchars($a['first_name'] . ' ' . $a['last_name']) ?></div>
                     <div class="meta"><?= htmlspecialchars($a['course']) ?> · <?= htmlspecialchars($a['year_level']) ?></div>
                 </div>
-                <span class="acc-status status-<?= $a['status'] ?>"><?= ucfirst($a['status']) ?></span>
                 <div class="acc-actions">
                     <button class="btn-view" title="View details" onclick="viewAccount(<?= $a['id'] ?>)">
                         <i class="fas fa-eye"></i>
@@ -370,7 +369,6 @@ async function viewAccount(id) {
         <div class="detail-row"><div class="detail-label">Email</div><div class="detail-val">${data.email}</div></div>
         <div class="detail-row"><div class="detail-label">Course</div><div class="detail-val">${data.course}</div></div>
         <div class="detail-row"><div class="detail-label">Year Level</div><div class="detail-val">${data.year_level}</div></div>
-        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-val">${data.status}</div></div>
         <div class="detail-row"><div class="detail-label">Has Voted</div><div class="detail-val">${data.has_voted ? 'Yes ✅' : 'Not yet'}</div></div>
         <div class="detail-row"><div class="detail-label">Registered</div><div class="detail-val">${data.created_at}</div></div>
     `;
@@ -439,7 +437,7 @@ async function submitCreate() {
                     <div class="name">${u.name}</div>
                     <div class="meta">${u.course} · ${u.year_level}</div>
                 </div>
-                <span class="acc-status status-approved">Approved</span>
+                
                 <div class="acc-actions">
                     <button class="btn-view" onclick="viewAccount(${u.id})"><i class="fas fa-eye"></i></button>
                     <button class="btn-del"  onclick="deleteAccount(${u.id}, '${u.name.split(' ')[0]}')"><i class="fas fa-trash"></i></button>

@@ -29,11 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fname   = trim($_POST['first_name']     ?? '');
             $lname   = trim($_POST['last_name']      ?? '');
             $mi      = trim($_POST['middle_initial'] ?? '');
-            $address = trim($_POST['address']        ?? '');
             $year    = trim($_POST['year_level']     ?? '');
 
             $profilePicQuery = "";
-            $params = [$fname, $lname, $mi, $address, $year];
+            $params = [$fname, $lname, $mi, $year];
 
             if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
                 $ext = pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION);
@@ -52,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $params[] = $user['id'];
                 $upd = $db->prepare(
-                    "UPDATE users SET first_name=?, last_name=?, middle_initial=?, address=?, year_level=? $profilePicQuery WHERE id=?"
+                    "UPDATE users SET first_name=?, last_name=?, middle_initial=?, year_level=? $profilePicQuery WHERE id=?"
                 );
                 $upd->execute($params);
 
@@ -89,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$status    = $profile['status'] ?? 'pending';
+
 $navActive = 'home';
 ?>
 <!DOCTYPE html>
@@ -236,9 +235,7 @@ $navActive = 'home';
             </div>
             <div class="profile-name"><?= htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']) ?></div>
             <div class="profile-id"><?= htmlspecialchars($profile['student_id']) ?></div>
-            <div>
-                <span class="status-pill status-<?= htmlspecialchars($status) ?>"><?= ucfirst($status) ?></span>
-            </div>
+           
             <?php if ($profile['has_voted']): ?>
                 <div style="margin-top:12px;font-size:12px;color:#065f46;font-weight:700">✅ Vote Cast</div>
             <?php endif; ?>
@@ -282,10 +279,6 @@ $navActive = 'home';
                     <div class="input-group">
                         <label>Course / Program</label>
                         <input type="text" class="glass-input" value="<?= htmlspecialchars($profile['course']) ?>" readonly>
-                    </div>
-                    <div class="input-group full-width">
-                        <label>Residential Address</label>
-                        <input type="text" name="address" class="glass-input editable" value="<?= htmlspecialchars($profile['address'] ?? '') ?>" readonly>
                     </div>
                 </div>
                 <button type="submit" id="saveProfileBtn" class="btn-action hidden">Save Profile Changes</button>

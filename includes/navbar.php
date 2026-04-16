@@ -9,7 +9,6 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 $user      = currentUser();
 $role      = $user['role'];
-$status    = $user['status'];
 $navActive = $navActive ?? '';
 
 // Home is the same page for everyone
@@ -18,12 +17,9 @@ $homeUrl = '/index.php';
 if ($role === 'admin') {
     $dashboardUrl = '/admin/dashboard.php';
     $homeUrl = '/admin/home.php';
-} elseif ($role === 'student' && $status === 'approved') {
+} elseif ($role === 'student') {
     $dashboardUrl = '/student/dashboard.php';
     $homeUrl = '/student/home.php';
-} elseif ($role === 'student') {
-    // Pending or rejected students have no dashboard yet — send to account page
-    $dashboardUrl = '/student/account.php';
 } else {
     $dashboardUrl = '/guest/dashboard.php';
 }
@@ -47,10 +43,10 @@ function navLink(string $href, string $label, string $active, string $key): stri
 
     <div class="nav-links">
         <?= navLink($homeUrl,      'Home',      $navActive, 'home') ?>
-        <?php if ($role === 'student' && $status !== 'approved'): ?>
+        <?php if ($role === 'student'): ?>
             <?php /* Pending/rejected students see "My Account" instead of "Dashboard" */ ?>
-            <?= navLink('/student/account.php', 'My Account', $navActive, 'dashboard') ?>
-        <?php else: ?>
+            <?= navLink($dashboardUrl, 'Dashboard', $navActive, 'dashboard') ?>
+        <?php elseif ($role === 'guest'): ?>
             <?= navLink($dashboardUrl, 'Dashboard', $navActive, 'dashboard') ?>
         <?php endif; ?>
         <?= navLink($aboutUrl, 'About', $navActive, 'about') ?>
@@ -68,11 +64,7 @@ function navLink(string $href, string $label, string $active, string $key): stri
     <div class="user-menu-container">
         <div class="user-greeting" onclick="toggleUserMenu(event)">
             Hello, <span><?= htmlspecialchars($user['first_name']) ?></span>
-            <?php if ($status === 'pending'): ?>
-                <span style="display:inline-block;background:#fef3c7;color:#92400e;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;">PENDING</span>
-            <?php elseif ($status === 'rejected'): ?>
-                <span style="display:inline-block;background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;">REJECTED</span>
-            <?php endif; ?>
+            
             <span class="arrow-icon">▼</span>
         </div>
         <div class="user-dropdown" id="userDropdownMenu">

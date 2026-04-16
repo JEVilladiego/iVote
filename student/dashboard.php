@@ -31,7 +31,7 @@ $hasVoted       = false;
 $myVotes        = []; // position_id => candidate data
 
 if ($election) {
-    $stats['voters'] = $db->query("SELECT COUNT(*) FROM users WHERE role='student' AND status='approved'")->fetchColumn();
+    $stats['voters'] = $db->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
     $sv = $db->prepare("SELECT COUNT(DISTINCT voter_id) FROM votes WHERE election_id=?");
     $sv->execute([$election['id']]);
     $stats['votes'] = $sv->fetchColumn();

@@ -39,25 +39,7 @@ function requireStudent(string $redirect = '/login.php'): void {
 
     $status = $_SESSION['status'] ?? '';
 
-    if ($status !== 'approved') {
-        // Determine which script is currently running
-        $script = $_SERVER['SCRIPT_FILENAME'] ?? '';
-        $isAccountPage = (basename($script) === 'account.php');
-
-        if ($status === 'pending' && $isAccountPage) {
-            // Allow pending students to view their own account page
-            return;
-        }
-
-        // Rejected students may also manage their account to re-submit
-        if ($status === 'rejected' && $isAccountPage) {
-            return;
-        }
-
-        // Every other restricted page → pending notice
-        header("Location: /pending.php");
-        exit;
-    }
+    
 }
 
 /** Redirect already-logged-in users away from login/register pages. */

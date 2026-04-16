@@ -18,10 +18,10 @@ FOUND NEW BUG - SOLVED
     - [/] vote.php when navigates into other webpages while voting, the votes automatically saves.
 
 
-TODO
 - DATABASE
-    - [ ] haven't inserted ALL user data yet. To be provided by data accumulators.
+    - [/] haven't inserted ALL user data yet. To be provided by data accumulators.
 
+TODO
 - ELECTION
     - [ ] what will happen after an election?
-
+    - [ ] Tie mechanism

@@ -13,7 +13,7 @@ $db->exec("UPDATE elections SET status='ongoing' WHERE start_date <= NOW() AND e
 $db->exec("UPDATE elections SET status='ended'   WHERE end_date   <  NOW() AND status='ongoing'");
 
 // ── Stats ────────────────────────────────────────────────────
-$totalVoters     = $db->query("SELECT COUNT(*) FROM users WHERE role='student' AND status='approved'")->fetchColumn();
+$totalVoters     = $db->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
 $totalCandidates = $db->query("SELECT COUNT(*) FROM candidates")->fetchColumn();
 $votesCast       = $db->query("SELECT COUNT(DISTINCT voter_id) FROM votes")->fetchColumn();
 $notVoted        = $totalVoters - $votesCast;
