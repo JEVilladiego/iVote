@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'President','Vice-President Internal','Vice-President External',
                 'General Secretary','Deputy Secretary','Treasurer','Auditor',
                 'Business Manager','Public Information Officer',
-                'BS Biology Representative','BS Computer Science Representative',
-                'BS Human Services Representative','BS Psychology Representative',
-                'BS Mathematics Representative'
+                'Bachelor of Science in Biology Representative','Bachelor of Science in Computer Science Representative',
+                'Bachelor of Science in Human Services Representative','Bachelor of Science in Psychology Representative',
+                'Bachelor of Science in Mathematics Representative'
             ];
             $posStmt = $db->prepare("INSERT INTO positions (election_id, title, sort_order) VALUES (?, ?, ?)");
             foreach ($positions as $i => $pos) {
@@ -50,28 +50,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: /admin/elections.php'); exit;
     }
 
-    // Update status manually (ongoing / ended only — not upcoming)
+   // Update status manually
     if ($action === 'setstatus') {
         $id     = intval($_POST['election_id']);
         $status = $_POST['status'] ?? '';
+        
         if ($id && in_array($status, ['ongoing', 'ended'])) {
+            // Check if another election is already ongoing
+            if ($status === 'ongoing') {
+                $stmtCheck = $db->prepare("SELECT COUNT(*) FROM elections WHERE status='ongoing' AND id != ?");
+                $stmtCheck->execute([$id]);
+                if ($stmtCheck->fetchColumn() > 0) {
+                    setFlash('error', 'Cannot start this election. Another election is currently ongoing.');
+                    header('Location: /admin/elections.php'); exit;
+                }
+            }
+            
             $db->prepare("UPDATE elections SET status=? WHERE id=?")->execute([$status, $id]);
             setFlash('success', 'Election status updated.');
         }
         header('Location: /admin/elections.php'); exit;
     }
 
-    // Reschedule election (updates dates; auto-sync will re-derive the correct status)
+    // Reschedule election
     if ($action === 'reschedule') {
         $id    = intval($_POST['election_id']);
         $start = $_POST['start_date'] ?? '';
         $end   = $_POST['end_date']   ?? '';
+        
         if ($id && $start && $end && $end > $start) {
             $now    = date('Y-m-d H:i:s');
-            $status = $start <= $now ? ($end >= $now ? 'ongoing' : 'ended') : 'upcoming';
+            $newStatus = $start <= $now ? ($end >= $now ? 'ongoing' : 'ended') : 'upcoming';
+            
+            // Check for ongoing conflict if the reschedule would set it to ongoing
+            if ($newStatus === 'ongoing') {
+                $stmtCheck = $db->prepare("SELECT COUNT(*) FROM elections WHERE status='ongoing' AND id != ?");
+                $stmtCheck->execute([$id]);
+                if ($stmtCheck->fetchColumn() > 0) {
+                    setFlash('error', 'Reschedule failed: The new dates would overlap with another ongoing election.');
+                    header('Location: /admin/elections.php'); exit;
+                }
+            }
+
             $db->prepare(
                 "UPDATE elections SET start_date=?, end_date=?, status=? WHERE id=?"
-            )->execute([$start, $end, $status, $id]);
+            )->execute([$start, $end, $newStatus, $id]);
             setFlash('success', 'Election rescheduled successfully.');
         } else {
             setFlash('error', 'Invalid dates. End date must be after start date.');
@@ -105,6 +128,8 @@ $elections = $db->query(
      ORDER BY e.created_at DESC"
 )->fetchAll();
 
+$anyOngoing = in_array('ongoing', array_column($elections, 'status'));
+
 $navActive     = 'dashboard';
 $sidebarActive = 'elections';
 $flash         = getFlash();
@@ -130,7 +155,7 @@ $flash         = getFlash();
             border:1px solid #e2e8f0; margin-bottom:32px;
             box-shadow:0 4px 16px rgba(0,0,0,0.06);
         }
-        .create-card h3 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.1rem; font-weight:800; margin-bottom:20px; }
+        .create-card h3 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1.1rem; font-weight:800; margin-bottom:20px;}
         .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
         .form-group { display:flex; flex-direction:column; gap:6px; }
         .form-group.full { grid-column:span 2; }
@@ -220,12 +245,12 @@ $flash         = getFlash();
         <?php endif; ?>
 
         <div class="page-header">
-            <h2>🗳️ Manage Elections</h2>
+            <h2>Manage Elections</h2>
         </div>
 
         <!-- Create form -->
         <div class="create-card">
-            <h3>➕ Create New Election</h3>
+            <h3><img src = /assets/img/icons/add.png> Create New Election</h3>
             <form method="POST" action="/admin/elections.php">
                 <input type="hidden" name="action" value="create">
                 <div class="form-grid">
@@ -270,7 +295,7 @@ $flash         = getFlash();
                             <div class="election-desc"><?= htmlspecialchars($e['description']) ?></div>
                         <?php endif; ?>
                         <div class="election-dates">
-                            📅 <?= date('M d, Y g:ia', strtotime($e['start_date'])) ?>
+                            <?= date('M d, Y g:ia', strtotime($e['start_date'])) ?>
                             &nbsp;→&nbsp;
                             <?= date('M d, Y g:ia', strtotime($e['end_date'])) ?>
                         </div>
@@ -299,24 +324,30 @@ $flash         = getFlash();
 
                 <div class="election-actions">
                     <!-- Status overrides -->
-                    <form method="POST" style="display:contents">
-                        <input type="hidden" name="action" value="setstatus">
-                        <input type="hidden" name="election_id" value="<?= $e['id'] ?>">
-                        <?php if ($e['status'] !== 'ongoing'): ?>
-                            <button type="submit" name="status" value="ongoing" class="act-btn btn-ongoing">▶ Set Ongoing</button>
-                        <?php endif; ?>
-                        <?php if ($e['status'] !== 'ended'): ?>
-                            <button type="submit" name="status" value="ended" class="act-btn btn-ended">⏹ End Election</button>
-                        <?php endif; ?>
-                    </form>
+                   <form method="POST" style="display:contents">
+    <input type="hidden" name="action" value="setstatus">
+    <input type="hidden" name="election_id" value="<?= $e['id'] ?>">
+    
+    <?php if ($e['status'] !== 'ongoing'): ?>
+        <?php if ($anyOngoing): ?>
+            <button type="button" class="act-btn" style="background:#f1f5f9; color:#94a3b8; cursor:not-allowed;" title="Another election is already ongoing" disabled>▶ Set Ongoing</button>
+        <?php else: ?>
+            <button type="submit" name="status" value="ongoing" class="act-btn btn-ongoing">▶ Set Ongoing</button>
+        <?php endif; ?>
+    <?php endif; ?>
+    
+    <?php if ($e['status'] !== 'ended'): ?>
+        <button type="submit" name="status" value="ended" class="act-btn btn-ended">⏹ End Election</button>
+    <?php endif; ?>
+</form>
 
                     <!-- Reschedule toggle -->
                     <button type="button" class="act-btn btn-reschedule"
                             onclick="toggleReschedule(<?= $e['id'] ?>)">
-                        📅 Reschedule
+                        Reschedule
                     </button>
 
-                    <a href="/admin/candidates.php?election_id=<?= $e['id'] ?>" class="act-btn" style="background:#d5e8db;color:#12341d;text-decoration:none;padding:8px 18px;">🏅 Manage Candidates</a>
+                    <a href="/admin/candidates.php?election_id=<?= $e['id'] ?>" class="act-btn" style="background:#d5e8db;color:#12341d;text-decoration:none;padding:8px 18px;">Manage Candidates</a>
 
                     <form method="POST" style="display:inline" onsubmit="return confirm('Delete this election and ALL its data? This cannot be undone.')">
                         <input type="hidden" name="action" value="delete">
@@ -327,7 +358,7 @@ $flash         = getFlash();
 
                 <!-- Reschedule inline form -->
                 <div class="reschedule-form" id="reschedule-<?= $e['id'] ?>">
-                    <div class="rform-title">📅 Reschedule Election</div>
+                    <div class="rform-title">Reschedule Election</div>
                     <form method="POST" action="/admin/elections.php">
                         <input type="hidden" name="action" value="reschedule">
                         <input type="hidden" name="election_id" value="<?= $e['id'] ?>">
