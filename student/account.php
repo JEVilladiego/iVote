@@ -237,7 +237,7 @@ $navActive = 'home';
             <div class="profile-id"><?= htmlspecialchars($profile['student_id']) ?></div>
            
             <?php if ($profile['has_voted']): ?>
-                <div style="margin-top:12px;font-size:12px;color:#065f46;font-weight:700">✅ Vote Cast</div>
+                <div style="margin-top:12px;font-size:12px;color:#065f46;font-weight:700">Vote Cast</div>
             <?php endif; ?>
         </div>
 
@@ -254,15 +254,15 @@ $navActive = 'home';
 
                     <div class="input-group">
                         <label>First Name</label>
-                        <input type="text" name="first_name" class="glass-input editable" value="<?= htmlspecialchars($profile['first_name']) ?>" readonly>
+                        <input type="text" name="first_name" class="glass-input" value="<?= htmlspecialchars($profile['first_name']) ?>" readonly>
                     </div>
                     <div class="input-group">
                         <label>M.I.</label>
-                        <input type="text" name="middle_initial" class="glass-input editable" value="<?= htmlspecialchars($profile['middle_initial'] ?? '') ?>" readonly>
+                        <input type="text" name="middle_initial" class="glass-input" value="<?= htmlspecialchars($profile['middle_initial'] ?? '') ?>" readonly>
                     </div>
                     <div class="input-group">
                         <label>Last Name</label>
-                        <input type="text" name="last_name" class="glass-input editable" value="<?= htmlspecialchars($profile['last_name']) ?>" readonly>
+                        <input type="text" name="last_name" class="glass-input" value="<?= htmlspecialchars($profile['last_name']) ?>" readonly>
                     </div>
                     <div class="input-group">
                         <label>Student No.</label>
@@ -270,7 +270,7 @@ $navActive = 'home';
                     </div>
                     <div class="input-group">
                         <label>Year Level</label>
-                        <select name="year_level" class="glass-input editable" disabled>
+                        <select name="year_level" class="glass-input" disabled>
                             <?php foreach (['1st Year','2nd Year','3rd Year','4th Year'] as $yr): ?>
                                 <option <?= $profile['year_level']===$yr?'selected':'' ?>><?= $yr ?></option>
                             <?php endforeach; ?>
@@ -289,7 +289,7 @@ $navActive = 'home';
 
 <!-- ── Change Password card ─────────────────────────────── -->
 <div class="password-card">
-    <h2>🔒 Change Password</h2>
+    <h2>Change Password</h2>
     <p>Update your account password. Your new password must be at least 8 characters long.</p>
 
     <form method="POST">
