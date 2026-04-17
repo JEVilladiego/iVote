@@ -14,10 +14,7 @@ $navActive = $navActive ?? '';
 // Home is the same page for everyone
 $homeUrl = '/index.php';
 
-if ($role === 'admin') {
-    $dashboardUrl = '/admin/dashboard.php';
-    $homeUrl = '/admin/home.php';
-} elseif ($role === 'student') {
+if ($role === 'student') {
     $dashboardUrl = '/student/dashboard.php';
     $homeUrl = '/student/home.php';
 } else {
@@ -41,6 +38,7 @@ function navLink(string $href, string $label, string $active, string $key): stri
         <div class="logo-text">COS ONLINE VOTING SYSTEM</div>
     </a>
 
+    <!-- Desktop nav links (hidden on mobile) -->
     <div class="nav-links">
         <?= navLink($homeUrl,      'Home',      $navActive, 'home') ?>
         <?php if ($role === 'student'): ?>
@@ -52,7 +50,8 @@ function navLink(string $href, string $label, string $active, string $key): stri
         <?= navLink($aboutUrl, 'About', $navActive, 'about') ?>
     </div>
 
- <?php if ($role === 'guest' || !isLoggedIn()): ?>
+    <!-- Desktop auth (hidden on mobile) -->
+    <?php if ($role === 'guest' || !isLoggedIn()): ?>
     <div class="nav-auth">
         <a href="/login.php" class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/login.php') echo ' active'; ?>" style="text-decoration: none; display: inline-block;">
             Log In
@@ -60,11 +59,10 @@ function navLink(string $href, string $label, string $active, string $key): stri
     </div>
 
     <?php elseif ($role === 'student'): ?>
-    <!-- STUDENT dropdown -->
+    <!-- STUDENT dropdown (desktop) -->
     <div class="user-menu-container">
         <div class="user-greeting" onclick="toggleUserMenu(event)">
             Hello, <span><?= htmlspecialchars($user['first_name']) ?></span>
-            
             <span class="arrow-icon">▼</span>
         </div>
         <div class="user-dropdown" id="userDropdownMenu">
@@ -80,19 +78,77 @@ function navLink(string $href, string $label, string $active, string $key): stri
             </form>
         </div>
     </div>
+    <?php endif; ?>
 
-    <?php else: ?>
-    <!-- ADMIN dropdown -->
-    <div class="user-menu-container">
-        <div class="user-greeting" onclick="toggleUserMenu(event)">
-            Hello, Admin <span class="arrow-icon">▼</span>
-        </div>
-        <div class="user-dropdown" id="userDropdownMenu">
+    <!-- Hamburger button (mobile only) -->
+    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</nav>
+
+<!-- Mobile dropdown panel (sits below the navbar) -->
+<div class="nav-mobile-panel" id="navMobilePanel">
+    <!-- Nav links -->
+    <?= navLink($homeUrl,      'Home',      $navActive, 'home') ?>
+    <?php if ($role === 'student'): ?>
+        <?= navLink($dashboardUrl, 'Dashboard', $navActive, 'dashboard') ?>
+    <?php elseif ($role === 'guest'): ?>
+        <?= navLink($dashboardUrl, 'Dashboard', $navActive, 'dashboard') ?>
+    <?php endif; ?>
+    <?= navLink($aboutUrl, 'About', $navActive, 'about') ?>
+
+    <div class="nav-mobile-divider"></div>
+
+    <!-- Auth / user section in mobile panel -->
+    <div class="nav-mobile-auth">
+        <?php if ($role === 'guest' || !isLoggedIn()): ?>
+            <a href="/login.php"
+               class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/login.php') echo ' active'; ?>"
+               style="text-decoration:none;text-align:center;">
+                Log In
+            </a>
+        <?php elseif ($role === 'student'): ?>
+            <div class="nav-mobile-user-info">
+                <strong><?= htmlspecialchars($user['name']) ?></strong>
+                <span>Student ID: <?= htmlspecialchars($user['student_id']) ?></span>
+            </div>
+            <a href="/student/account.php" class="update-link">My Account</a>
             <form method="POST" action="/logout.php">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <button type="submit" class="btn-logout-oval">Log Out</button>
             </form>
-        </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
-</nav>
+</div>
+
+<script>
+(function () {
+    var hamburger = document.getElementById('navHamburger');
+    var panel     = document.getElementById('navMobilePanel');
+
+    hamburger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = panel.classList.toggle('open');
+        hamburger.classList.toggle('open', isOpen);
+        hamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!panel.contains(e.target) && !hamburger.contains(e.target)) {
+            panel.classList.remove('open');
+            hamburger.classList.remove('open');
+            hamburger.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    panel.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            panel.classList.remove('open');
+            hamburger.classList.remove('open');
+            hamburger.setAttribute('aria-expanded', 'false');
+        });
+    });
+})();
+</script>

@@ -93,8 +93,8 @@ $currentUser = currentUser();
 .sidebar-profile {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 0 20px 24px;
+    gap: 5px;
+    padding: 0 10px 24px;
     position: relative;
 }
 
@@ -254,7 +254,17 @@ $currentUser = currentUser();
 }
 </style>
 
-<aside class="sidebar">
+<!-- Sidebar overlay (mobile: tap outside to close) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar toggle button (mobile only) -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<aside class="sidebar" id="adminSidebar">
 
     <!-- Brand -->
     <a href="/admin/dashboard.php" class="sidebar-brand">
@@ -268,7 +278,36 @@ $currentUser = currentUser();
 
     <div class="sidebar-divider"></div>
 
-    <!-- User profile -->
+  
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <a href="/admin/dashboard.php"
+           class="<?= ($sidebarActive ?? '') === 'dashboard' ? 'active' : '' ?>">
+           <span><img src = /assets/img/icons/dashboard.png></span>
+            Dashboard
+        </a>
+        <a href="/admin/accounts.php"
+           class="<?= ($sidebarActive ?? '') === 'accounts' ? 'active' : '' ?>">
+           <span><img src = /assets/img/icons/manageAccount.png></span>
+            Manage Accounts
+        </a>
+        <a href="/admin/elections.php"
+           class="<?= ($sidebarActive ?? '') === 'elections' ? 'active' : '' ?>">
+           <span><img src = /assets/img/icons/election.png></span>
+            Manage Elections
+        </a>
+        <a href="/admin/candidates.php"
+           class="<?= ($sidebarActive ?? '') === 'candidates' ? 'active' : '' ?>">
+           <span><img src = /assets/img/icons/addCandidate.png></span>
+            Manage Candidates
+        </a>
+    </nav>
+
+    <!-- Logout -->
+     
+    <div class="sidebar-footer">
+          <!-- User profile -->
     <div class="sidebar-profile">
         <div class="sidebar-avatar">
             <?php
@@ -286,30 +325,6 @@ $currentUser = currentUser();
             <div class="sidebar-user-role">Admin ID: <?= htmlspecialchars($currentUser['student_id'] ?? 'ADM-0000') ?></div>
         </div>
     </div>
-
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
-        <a href="/admin/dashboard.php"
-           class="<?= ($sidebarActive ?? '') === 'dashboard' ? 'active' : '' ?>">
-            Dashboard
-        </a>
-        <a href="/admin/accounts.php"
-           class="<?= ($sidebarActive ?? '') === 'accounts' ? 'active' : '' ?>">
-            Manage Accounts
-        </a>
-        <a href="/admin/elections.php"
-           class="<?= ($sidebarActive ?? '') === 'elections' ? 'active' : '' ?>">
-            Manage Elections
-        </a>
-        <a href="/admin/candidates.php"
-           class="<?= ($sidebarActive ?? '') === 'candidates' ? 'active' : '' ?>">
-            Manage Candidates
-        </a>
-    </nav>
-
-    <!-- Logout -->
-     
-    <div class="sidebar-footer">
         <form method="POST" action="/logout.php">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <button type="submit"  class = "sidebar-logout-btn">Log Out</button>
@@ -320,3 +335,37 @@ $currentUser = currentUser();
     </div>
 
 </aside>
+
+<script>
+(function () {
+    var toggle   = document.getElementById('sidebarToggle');
+    var sidebar  = document.getElementById('adminSidebar');
+    var overlay  = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        toggle.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close on nav link click (useful if page doesn't fully reload)
+    sidebar.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', closeSidebar);
+    });
+})();
+</script>

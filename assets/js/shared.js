@@ -27,3 +27,11 @@ function closeAuthModal() {
 document.getElementById('authModal')?.addEventListener('click', function (e) {
     if (e.target === this) closeAuthModal();
 });
+
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+
