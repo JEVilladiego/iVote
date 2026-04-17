@@ -770,6 +770,8 @@ $navActive = 'dashboard';
           $posTotal = array_sum(array_column($cands, 'votes'));
           $suffixes = ['st','nd','rd'];
           $myPickId = $myVotes[$pos['id']]['candidate_id'] ?? null;
+          $topVotes = !empty($cands) ? (int)$cands[0]['votes'] : 0;
+          $isTiePos = !empty($cands) && count(array_filter($cands, fn($c) => (int)$c['votes'] === $topVotes)) > 1;
         ?>
         <div class="position-card" data-pos="pos-<?= $pos['id'] ?>">
           <h3><?= htmlspecialchars($pos['title']) ?></h3>
@@ -810,7 +812,10 @@ $navActive = 'dashboard';
               <div class="vote-bar"><span style="width:<?= $cpct ?>%"></span></div>
               <div class="candidate-foot">
                 <span><?= $cpct ?>%</span>
-                <span><?= $rank === 0 ? '🏆 Leading' : 'Candidate' ?></span>
+                <?php
+                  $isCandTied = $isTiePos && (int)$c['votes'] === $topVotes;
+                  echo '<span>' . ($isCandTied ? '🤝 Tie' : ($rank === 0 ? '🏆 Leading' : 'Candidate')) . '</span>';
+                ?>
               </div>
             </div>
             <?php endforeach; ?>
@@ -833,14 +838,14 @@ $navActive = 'dashboard';
       </div>
       <div class="print-actions">
         <div class="print-card">
-          <h3>🏆 Elected Officers Summary</h3>
-          <p>Print a clean results sheet showing the top-ranked (elected) candidate per position for this election.</p>
+          <h3>Elected Officers Summary</h3>
+          <p>Print a clean results sheet showing the top-ranked (elected) candidate per position for this election.</p></br>
           <button class="print-btn" type="button" onclick="printWinners()">Print Officers Summary</button>
           <div class="print-note">Contains elected officer names, positions, and vote counts.</div>
         </div>
 
         <div class="print-card alt">
-          <h3>📄 Full Results</h3>
+          <h3>Full Results</h3>
           <p>Print the complete results page with all candidates ranked by votes across every position, plus participation data.</p>
           <button class="print-btn" type="button" onclick="printFull()">Print Full Results</button>
           <div class="print-note">Your selections, if any, will be highlighted in green on the printout.</div>
@@ -848,14 +853,14 @@ $navActive = 'dashboard';
 
         <?php if ($hasVoted && !empty($myVotes)): ?>
         <div class="print-card personal">
-          <h3>🧾 My Vote Summary</h3>
+          <h3>My Vote Summary</h3>
           <p>Print a personal record of the candidates you voted for in this election, including your student information.</p>
           <button class="print-btn" type="button" onclick="printMyVotes()">Print My Vote Summary</button>
           <div class="print-note">This is your personal voting receipt. Keep it as a record of your participation.</div>
         </div>
         <?php else: ?>
         <div class="print-card personal" style="opacity:0.55;">
-          <h3>🧾 My Vote Summary</h3>
+          <h3>My Vote Summary</h3>
           <p>This option is only available after you have submitted your ballot.</p>
           <button class="print-btn" type="button" disabled style="opacity:0.6;cursor:not-allowed;">Not Available</button>
           <div class="print-note">You did not cast a vote in this election.</div>
@@ -868,7 +873,7 @@ $navActive = 'dashboard';
     <?php else: ?>
     <!-- ── Upcoming ── -->
     <div class="countdown-card print-hidden">
-      <div class="section-label">📅 Election Opens In</div>
+      <div class="section-label">Election Opens In</div>
       <div class="cd-row" id="countdown">
         <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Days</span></div>
         <div class="cd-block"><span class="cd-num">--</span><span class="cd-lbl">Hours</span></div>
@@ -879,7 +884,7 @@ $navActive = 'dashboard';
 
     <div class="ongoing-wrap print-hidden">
       <div class="ongoing-card">
-        <div class="eyebrow">📅 Upcoming Election</div>
+        <div class="eyebrow">Upcoming Election</div>
         <h2>The voting session hasn't started yet.</h2>
         <p>This election is scheduled to open on <?= date('F d, Y \a\t g:ia', strtotime($election['start_date'])) ?>. Check back once voting begins to cast your ballot.</p>
         <div class="session-meta"><?= htmlspecialchars($election['title']) ?></div>
@@ -922,18 +927,23 @@ $navActive = 'dashboard';
       </thead>
       <tbody>
         <?php $i = 1; foreach ($positions as $pos):
-          $topCand = $candidatesByPos[$pos['id']][0] ?? null;
-          if (!$topCand) continue;
+          $posCands = $candidatesByPos[$pos['id']] ?? [];
+          if (empty($posCands)) continue;
+          $posTopVotes = (int)$posCands[0]['votes'];
+          $posTopCands = array_filter($posCands, fn($c) => (int)$c['votes'] === $posTopVotes);
+          $posIsTie    = count($posTopCands) > 1;
         ?>
+        <?php foreach ($posTopCands as $topCand): ?>
         <tr>
           <td class="td-num"><?= $i++ ?></td>
           <td class="td-pos"><?= htmlspecialchars($pos['title']) ?></td>
-          <td class="td-name"><?= htmlspecialchars($topCand['name']) ?><span class="td-badge">ELECTED</span></td>
+          <td class="td-name"><?= htmlspecialchars($topCand['name']) ?><span class="td-badge"><?= $posIsTie ? 'Tie' : 'Elected' ?></span></td>
           <td class="td-course">
             <?= htmlspecialchars($topCand['course']) ?>
             <span class="td-sid"><?= htmlspecialchars($topCand['student_id'] ?? '') ?></span>
           </td>
         </tr>
+        <?php endforeach; ?>
         <?php endforeach; ?>
       </tbody>
     </table>
@@ -1134,16 +1144,19 @@ $navActive = 'dashboard';
       if (cands.length === 0) {
         positionRows += `<tr><td colspan="5" style="color:#94a3b8;padding:8px 10px;font-size:8.5pt;">No candidates registered.</td></tr>`;
       } else {
+        const topVotes = parseInt(cands[0].votes || 0);
+        const isTie = cands.filter(c => parseInt(c.votes || 0) === topVotes).length > 1;
         cands.forEach((c, rank) => {
           const pct = posTotal > 0 ? Math.round(c.votes / posTotal * 1000) / 10 : 0;
           const rankN = rank + 1;
           const suffix = suffixes[Math.min(rankN - 1, 2)] || 'th';
           const isMyPick = (myPick && parseInt(myPick) === parseInt(c.id));
-          const isLeader = rank === 0;
-          const rowClass = isMyPick ? ' my-row' : (isLeader ? ' lead-row' : '');
+          const isCandTied = isTie && parseInt(c.votes || 0) === topVotes;
+          const isLeader = rank === 0 && !isTie;
+          const rowClass = isMyPick ? ' my-row' : (isCandTied || isLeader ? ' lead-row' : '');
           positionRows += `<tr class="${rowClass}">
             <td class="td-num">${rankN}<sup>${suffix}</sup></td>
-            <td class="td-name">${c.name}${isMyPick ? '<span class="td-badge voted">✓ MY VOTE</span>' : ''}${isLeader ? '<span class="td-badge lead">🏆 Leading</span>' : ''}</td>
+            <td class="td-name">${c.name}${isMyPick ? '<span class="td-badge voted">✓ MY VOTE</span>' : ''}${isCandTied ? '<span class="td-badge lead">🤝 Tie</span>' : (isLeader ? '<span class="td-badge lead">🏆 Leading</span>' : '')}</td>
             <td class="td-course">${c.course}${c.partylist ? `<span class="td-sid">${c.partylist}</span>` : ''}</td>
             <td class="td-pct">${pct}%</td>
             <td class="td-votes"><strong>${c.votes}</strong></td>

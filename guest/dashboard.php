@@ -733,6 +733,8 @@ $navActive = 'dashboard';
           $cands    = $candidatesByPos[$pos['id']] ?? [];
           $posTotal = array_sum(array_column($cands, 'votes'));
           $suffixes = ['st','nd','rd'];
+          $topVotes = !empty($cands) ? (int)$cands[0]['votes'] : 0;
+          $isTiePos = !empty($cands) && count(array_filter($cands, fn($c) => (int)$c['votes'] === $topVotes)) > 1;
         ?>
         <div class="position-card" data-pos="pos-<?= $pos['id'] ?>">
           <h3><?= htmlspecialchars($pos['title']) ?></h3>
@@ -771,7 +773,10 @@ $navActive = 'dashboard';
               <div class="vote-bar"><span style="width:<?= $cpct ?>%"></span></div>
               <div class="candidate-foot">
                 <span><?= $cpct ?>%</span>
-                <span><?= $rank === 0 ? '🏆 Leading' : 'Candidate' ?></span>
+                <?php
+                  $isCandTied = $isTiePos && (int)$c['votes'] === $topVotes;
+                  echo '<span>' . ($isCandTied ? '🤝 Tie' : ($rank === 0 ? '🏆 Leading' : 'Candidate')) . '</span>';
+                ?>
               </div>
             </div>
             <?php endforeach; ?>
@@ -867,18 +872,23 @@ $navActive = 'dashboard';
       </thead>
       <tbody>
         <?php $i = 1; foreach ($positions as $pos):
-          $topCand = $candidatesByPos[$pos['id']][0] ?? null;
-          if (!$topCand) continue;
+          $posCands = $candidatesByPos[$pos['id']] ?? [];
+          if (empty($posCands)) continue;
+          $posTopVotes = (int)$posCands[0]['votes'];
+          $posTopCands = array_filter($posCands, fn($c) => (int)$c['votes'] === $posTopVotes);
+          $posIsTie    = count($posTopCands) > 1;
         ?>
+        <?php foreach ($posTopCands as $topCand): ?>
         <tr>
           <td class="td-num"><?= $i++ ?></td>
           <td class="td-pos"><?= htmlspecialchars($pos['title']) ?></td>
-          <td class="td-name"><?= htmlspecialchars($topCand['name']) ?><span class="td-badge">ELECTED</span></td>
+          <td class="td-name"><?= htmlspecialchars($topCand['name']) ?><span class="td-badge"><?= $posIsTie ? 'Tie' : 'Elected' ?></span></td>
           <td class="td-course">
             <?= htmlspecialchars($topCand['course']) ?>
             <span class="td-sid"><?= htmlspecialchars($topCand['student_id'] ?? '') ?></span>
           </td>
         </tr>
+        <?php endforeach; ?>
         <?php endforeach; ?>
       </tbody>
     </table>
@@ -1019,15 +1029,18 @@ $navActive = 'dashboard';
       if (cands.length === 0) {
         positionRows += `<tr><td colspan="5" style="color:#94a3b8;padding:8px 10px;font-size:8.5pt;">No candidates registered.</td></tr>`;
       } else {
+        const topVotes = parseInt(cands[0].votes || 0);
+        const isTie = cands.filter(c => parseInt(c.votes || 0) === topVotes).length > 1;
         cands.forEach((c, rank) => {
           const pct = posTotal > 0 ? Math.round(c.votes / posTotal * 1000) / 10 : 0;
           const rankN = rank + 1;
           const suffix = suffixes[Math.min(rankN - 1, 2)] || 'th';
-          const isLeader = rank === 0;
-          const rowClass = isLeader ? ' lead-row' : '';
+          const isCandTied = isTie && parseInt(c.votes || 0) === topVotes;
+          const isLeader = rank === 0 && !isTie;
+          const rowClass = (isCandTied || isLeader) ? ' lead-row' : '';
           positionRows += `<tr class="${rowClass}">
             <td class="td-num">${rankN}<sup>${suffix}</sup></td>
-            <td class="td-name">${c.name}${isLeader ? '<span class="td-badge lead">🏆 Leading</span>' : ''}</td>
+            <td class="td-name">${c.name}${isCandTied ? '<span class="td-badge lead">🤝 Tie</span>' : (isLeader ? '<span class="td-badge lead">🏆 Leading</span>' : '')}</td>
             <td class="td-course">${c.course}${c.partylist ? `<span class="td-sid">${c.partylist}</span>` : ''}</td>
             <td class="td-pct">${pct}%</td>
             <td class="td-votes"><strong>${c.votes}</strong></td>
