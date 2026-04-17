@@ -4,22 +4,30 @@
 // =============================================================
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/rate_limiter.php';
 
-redirectIfLoggedIn();   
+redirectIfLoggedIn();
+
+$rateLimiter = new RateLimiter($pdo);
 
 $navActive = 'login';
-
-$error = '';
+$error     = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'login') {
+        // ✅ Define $sid FIRST before passing to check()
         $sid  = trim($_POST['student_id'] ?? '');
         $pass = $_POST['password'] ?? '';
 
+        // ✅ check() now has $sid available, and is inside the right block
+        $rateLimiter->check('login', $sid);
+
         if ($sid === '' || $pass === '') {
             $error = 'Please fill in all fields.';
+            // ✅ Empty submissions count as a failure too
+            $rateLimiter->recordFailure('login', $sid);
         } else {
             $db   = getDB();
             $stmt = $db->prepare("SELECT * FROM users WHERE student_id = ? LIMIT 1");
@@ -27,11 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($pass, $user['password_hash'])) {
+                // ✅ Successful login — reset the counter
+                $rateLimiter->recordSuccess('login', $sid);
                 loginUser($user);
                 $dest = ($user['role'] === 'admin') ? '/admin/dashboard.php' : '/student/dashboard.php';
                 header("Location: $dest");
                 exit;
             } else {
+                // ✅ Failed login — increment the counter
+                $rateLimiter->recordFailure('login', $sid);
                 $error = 'Invalid Student ID or password.';
             }
         }

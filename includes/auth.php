@@ -4,7 +4,12 @@
 // =============================================================
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+    
 }
+// FORCE BROWSER TO NEVER CACHE THESE PAGES
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
 // ---- Guards ------------------------------------------------
 
@@ -27,8 +32,6 @@ function requireAdmin(string $redirect = '/login.php'): void {
 
 /**
  * Redirect if logged-in user is not a student.
- * Pending students are allowed through ONLY on account.php
- * so they can upload their COR before approval.
  */
 function requireStudent(string $redirect = '/login.php'): void {
     requireLogin($redirect);
@@ -50,11 +53,10 @@ function redirectIfLoggedIn(): void {
 
         if ($role === 'admin') {
             header("Location: /admin/dashboard.php");
-        } elseif ($status === 'approved') {
+        } elseif ($role === 'student') {
             header("Location: /student/dashboard.php");
         } else {
-            // Pending / rejected students go straight to their account page
-            header("Location: /student/account.php");
+            header("Location: /login.php");
         }
         exit;
     }
