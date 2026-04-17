@@ -58,7 +58,7 @@ $navActive = 'about';
             box-shadow:0 8px 20px rgba(0,0,0,0.1); overflow:hidden;
         }
         .img-placeholder img { width:100%; height:100%; object-fit:cover; }
-        .name { font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.5rem; color:#fff; margin:0 0 12px; }
+        .name { font-family:'Montserrat',sans-serif; font-weight:800; font-size: 100%; color:#fff; margin:0 0 12px; }
         .contribution {
             font-family:'Geist',sans-serif; font-weight:500; font-size:13px;
             color:var(--deep-green); background:var(--tint-green);
@@ -80,13 +80,21 @@ $navActive = 'about';
         <?php
         // ---- Add your real team members here ----
         $team = [
-            ['name'=>'Member Name',  'role'=>'Project Lead / Full-Stack'],
-            ['name'=>'Member Name',  'role'=>'Frontend Developer'],
-            ['name'=>'Member Name',  'role'=>'Backend Developer'],
-            ['name'=>'Member Name',  'role'=>'Database Architect'],
-            ['name'=>'Member Name',  'role'=>'UI/UX Designer'],
-            ['name'=>'Member Name',  'role'=>'Security & Auth'],
-            ['name'=>'Member Name',  'role'=>'QA & Testing'],
+            ['name'=>'Alwin Publico',  'role'=>'Frontend Developer'],
+            ['name'=>'Barbie Ann San Buenaventura',  'role'=>'Frontend Developer'],
+            ['name'=>'Carmelo Rivera',  'role'=>'Frontend Developer'],
+            ['name'=>'Christian Adam Rico',  'role'=>'Frontend Developer'],
+            ['name'=>'Danilo Quirido Jr.',  'role'=>'Frontend Developer'],
+            ['name'=>'Francia Mae Mercado',  'role'=>'Frontend Developer'],
+            ['name'=>'Miguel Adrian Sajulga',  'role'=>'Frontend Developer'],
+            ['name'=>'Albert Gerome San Juan',  'role'=>'Frontend Developer'],
+            ['name'=>'Mark Lester Viloria',  'role'=>'Frontend Developer'],
+            ['name'=>'Ian Kurt Valencia',  'role'=>'UI/UX Designer & Frontend Developer'],
+            ['name'=>'Cirelle Sadia',  'role'=>'Data Accumulator'],
+            ['name'=>'Stefanie Sorell Sesuca',  'role'=>'Data Accumulator'],
+            ['name'=>'Joana Zapanta',  'role'=>'Data Accumulator'],
+            ['name'=>'Rian Niño Suñiga',  'role'=>'Backend Developer'],
+            ['name'=>'John Edward Villadiego',  'role'=>'Backend Developer'],
         ];
         foreach ($team as $member):
             $initials = implode('', array_map(fn($p) => strtoupper($p[0]), explode(' ', $member['name'])));

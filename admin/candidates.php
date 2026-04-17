@@ -158,7 +158,7 @@ $flash         = getFlash();
         .form-card {
             background:#fff; border-radius:20px; padding:28px;
             border:1px solid #e2e8f0; box-shadow:0 4px 16px rgba(0,0,0,0.05);
-            position:sticky; top:100px;
+            position:relative; top:1px;
         }
         .form-card h3 { font-family:'Montserrat',sans-serif; color:#12341d; font-size:1rem; font-weight:800; margin-bottom:18px; }
         .form-row { margin-bottom:14px; }
@@ -215,7 +215,7 @@ $flash         = getFlash();
             <div class="flash <?= $flash['type'] ?>"><?= htmlspecialchars($flash['message']) ?></div>
         <?php endif; ?>
 
-        <h2>🏅 Manage Candidates</h2>
+        <h2>Manage Candidates</h2>
 
         <div class="election-selector">
             <span class="selector-label">Election:</span>
@@ -286,11 +286,11 @@ $flash         = getFlash();
                         <label class="form-label">Course *</label>
                         <select class="form-select" name="course" required>
                             <option value="">Select Course</option>
-                            <option>BS Biology</option>
-                            <option>BS Computer Science</option>
-                            <option>BS Human Services</option>
-                            <option>BS Psychology</option>
-                            <option>BS Mathematics</option>
+                            <option>Bachelor of Science in Biology</option>
+                            <option>Bachelor of Science in Computer Science</option>
+                            <option>Bachelor of Science in Human Services</option>
+                            <option>Bachelor of Science in Psychology</option>
+                            <option>Bachelor of Science in Mathematics</option>
                         </select>
                     </div>
                     <div class="form-row">

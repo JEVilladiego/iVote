@@ -12,17 +12,35 @@ $db = getDB();
 $db->exec("UPDATE elections SET status='ongoing' WHERE start_date <= NOW() AND end_date >= NOW() AND status='upcoming'");
 $db->exec("UPDATE elections SET status='ended'   WHERE end_date   <  NOW() AND status='ongoing'");
 
-// ── Stats ────────────────────────────────────────────────────
-$totalVoters     = $db->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
-$totalCandidates = $db->query("SELECT COUNT(*) FROM candidates")->fetchColumn();
-$votesCast       = $db->query("SELECT COUNT(DISTINCT voter_id) FROM votes")->fetchColumn();
-$notVoted        = $totalVoters - $votesCast;
-
 // ── Active / most-recent election ───────────────────────────
+// We must get the election FIRST so we have an ID to filter the stats with.
 $election = $db->query("SELECT * FROM elections WHERE status='ongoing' LIMIT 1")->fetch();
 if (!$election) {
     $election = $db->query("SELECT * FROM elections ORDER BY start_date DESC LIMIT 1")->fetch();
 }
+
+// ── Stats ────────────────────────────────────────────────────
+// Total voters (Global: all eligible students)
+$totalVoters = $db->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
+
+// Default values in case there are no elections created yet
+$totalCandidates = 0;
+$votesCast       = 0;
+
+if ($election) {
+    // Candidates for THIS election
+    $stmtC = $db->prepare("SELECT COUNT(*) FROM candidates WHERE election_id = ?");
+    $stmtC->execute([$election['id']]);
+    $totalCandidates = $stmtC->fetchColumn();
+
+    // Votes cast in THIS election
+    $stmtV = $db->prepare("SELECT COUNT(DISTINCT voter_id) FROM votes WHERE election_id = ?");
+    $stmtV->execute([$election['id']]);
+    $votesCast = $stmtV->fetchColumn();
+}
+
+// Calculate unvoted
+$notVoted = $totalVoters - $votesCast;
 
 // ── Post-election: winner per position = highest vote count ──
 // Purely automatic — no manual override needed.
@@ -47,12 +65,20 @@ if ($election && $election['status'] === 'ended') {
     );
     $rows->execute([$election['id']]);
 
-    // First row per position = most votes = elected
-    $seen = [];
+    // Collect all candidates per position, then detect ties at the top vote count.
+    // A tie means two or more candidates share the highest vote count (including zero).
+    $allByPosition = []; // position title => [ candidate rows ]
     foreach ($rows->fetchAll() as $r) {
-        if (!isset($seen[$r['position']])) {
-            $winners[$r['position']] = $r;
-            $seen[$r['position']]    = true;
+        $allByPosition[$r['position']][] = $r;
+    }
+    foreach ($allByPosition as $position => $cands) {
+        $topVotes = (int) $cands[0]['vote_count'];
+        $topCands = array_filter($cands, fn($c) => (int)$c['vote_count'] === $topVotes);
+        $isTie    = count($topCands) > 1;
+        // Store as array of winners; each entry has an extra 'is_tie' flag
+        foreach ($topCands as $tc) {
+            $tc['is_tie']             = $isTie;
+            $winners[$position][]     = $tc;
         }
     }
 }
@@ -331,15 +357,15 @@ $printDate  = date('F d, Y');
                     <span class="status-pill pill-<?= $election['status'] ?>"><?= ucfirst($election['status']) ?></span>
                 </div>
                 <div class="election-dates">
-                    📅 <?= date('M d, Y g:ia', strtotime($election['start_date'])) ?>
+                    <?= date('M d, Y g:ia', strtotime($election['start_date'])) ?>
                     &nbsp;→&nbsp;
                     <?= date('M d, Y g:ia', strtotime($election['end_date'])) ?>
                 </div>
                 <?php if ($election['status'] === 'ongoing'): ?>
-                    <p style="font-size:0.85rem;color:#64748b;margin-top:12px">⏳ Time remaining until election closes:</p>
+                    <p style="font-size:0.85rem;color:#64748b;margin-top:12px">Time remaining until election closes:</p>
                     <div class="countdown-row" id="countdown"></div>
                 <?php elseif ($election['status'] === 'upcoming'): ?>
-                    <p style="font-size:0.85rem;color:#64748b;margin-top:12px">🗓️ Time until election opens:</p>
+                    <p style="font-size:0.85rem;color:#64748b;margin-top:12px">Time until election opens:</p>
                     <div class="countdown-row" id="countdown"></div>
                 <?php else: ?>
                     <p style="font-size:0.85rem;color:#94a3b8;margin-top:12px">This election has ended. Elected officers are shown below.</p>
@@ -358,9 +384,10 @@ $printDate  = date('F d, Y');
         </button>
 
         <div class="results-grid">
-            <?php foreach ($winners as $position => $w): ?>
+            <?php foreach ($winners as $position => $winnerList): ?>
             <div class="winner-card">
                 <div class="winner-card-header"><?= htmlspecialchars($position) ?></div>
+                <?php foreach ($winnerList as $w): ?>
                 <div class="winner-card-body">
                     <div class="winner-avatar">
                         <?php if ($w['photo']): ?>
@@ -374,9 +401,10 @@ $printDate  = date('F d, Y');
                         <div class="winner-meta">
                             <?= htmlspecialchars($w['course']) ?> &nbsp;·&nbsp; <?= htmlspecialchars($w['cand_sid']) ?>
                         </div>
-                        <span class="elected-tag">🏅 Elected</span>
+                        <span class="elected-tag"><?= $w['is_tie'] ? '🤝 Tie' : '🏅 Elected' ?></span>
                     </div>
                 </div>
+                <?php endforeach; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -386,17 +414,17 @@ $printDate  = date('F d, Y');
         <div class="section-title">Quick Actions</div>
         <div class="actions-grid">
             <a href="/admin/accounts.php" class="action-card">
-                <div class="action-icon">👥</div>
+                <div class="action-icon"><span><img src = /assets/img/icons/manageAccountW.png></span></div>
                 <div class="action-name">Manage Accounts</div>
                 <div class="action-desc">Add or manage voter accounts</div>
             </a>
             <a href="/admin/elections.php" class="action-card">
-                <div class="action-icon">🗳️</div>
+                <div class="action-icon"><span><img src = /assets/img/icons/electionW.png></span></div>
                 <div class="action-name">Manage Elections</div>
                 <div class="action-desc">Create or close elections</div>
             </a>
             <a href="/admin/candidates.php" class="action-card">
-                <div class="action-icon">🏅</div>
+                <div class="action-icon"><span><img src = /assets/img/icons/addCandidateW.png></span></div>
                 <div class="action-name">Manage Candidates</div>
                 <div class="action-desc">Register candidates per position</div>
             </a>
@@ -443,16 +471,18 @@ $printDate  = date('F d, Y');
             </tr>
         </thead>
         <tbody>
-            <?php $i = 1; foreach ($winners as $position => $w): ?>
+            <?php $i = 1; foreach ($winners as $position => $winnerList): ?>
+            <?php foreach ($winnerList as $w): ?>
             <tr>
                 <td class="td-num"><?= $i++ ?></td>
                 <td class="td-pos"><?= htmlspecialchars($position) ?></td>
                 <td class="td-name">
                     <?= htmlspecialchars($w['name']) ?>
-                    &nbsp;<span class="td-badge">Elected</span>
+                    &nbsp;<span class="td-badge"><?= $w['is_tie'] ? 'Tie' : 'Elected' ?></span>
                 </td>
                 <td><?= htmlspecialchars($w['course']) ?><br><span style="color:#94a3b8;font-size:7.5pt"><?= htmlspecialchars($w['cand_sid']) ?></span></td>
             </tr>
+            <?php endforeach; ?>
             <?php endforeach; ?>
         </tbody>
     </table>
