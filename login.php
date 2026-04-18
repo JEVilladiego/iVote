@@ -8,7 +8,7 @@ require_once __DIR__ . '/includes/rate_limiter.php';
 
 redirectIfLoggedIn();
 
-$rateLimiter = new RateLimiter($pdo);
+$rateLimiter = new RateLimiter(getDB());
 
 $navActive = 'login';
 $error     = '';
