@@ -23,5 +23,5 @@ FOUND NEW BUG - SOLVED
 
 TODO
 - ELECTION
-    - [ ] what will happen after an election?
-    - [ ] Tie mechanism
+    - [/] what will happen after an election?
+    - [/] Tie mechanism
