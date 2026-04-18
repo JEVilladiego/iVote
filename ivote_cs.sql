@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2026 at 05:13 PM
+-- Generation Time: Apr 18, 2026 at 10:37 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -116,7 +116,7 @@ CREATE TABLE `elections` (
 --
 
 INSERT INTO `elections` (`id`, `title`, `description`, `start_date`, `end_date`, `status`, `created_by`, `created_at`) VALUES
-(3, 'COSA Elections A.Y. 2025–2026', 'Official election for the College of Science Student Organization officers.', '2026-04-03 08:00:00', '2026-05-01 17:00:00', 'ended', 1, '2026-04-04 17:30:55');
+(3, 'COSA Elections A.Y. 2025–2026', 'Official election for the College of Science Student Organization officers.', '2026-04-18 08:00:00', '2026-05-01 17:00:00', 'ended', 1, '2026-04-04 17:30:55');
 
 -- --------------------------------------------------------
 
@@ -154,6 +154,29 @@ INSERT INTO `positions` (`id`, `election_id`, `title`, `sort_order`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `rate_limits`
+--
+
+CREATE TABLE `rate_limits` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `identifier` varchar(100) NOT NULL DEFAULT '',
+  `attempts` tinyint(3) UNSIGNED NOT NULL DEFAULT 1,
+  `last_attempt` datetime NOT NULL DEFAULT current_timestamp(),
+  `locked_until` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `rate_limits`
+--
+
+INSERT INTO `rate_limits` (`id`, `ip_address`, `action`, `identifier`, `attempts`, `last_attempt`, `locked_until`) VALUES
+(2, '::1', 'login', 'M2025-0010', 1, '2026-04-18 14:32:23', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -183,7 +206,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `student_id`, `first_name`, `last_name`, `middle_initial`, `email`, `password_hash`, `course`, `year_level`, `birthday`, `section`, `profile_pic`, `role`, `verified_by`, `has_voted`, `created_at`, `updated_at`) VALUES
 (1, 'ADM-9901', 'System', 'Admin', '', 'admin@ivote.edu.ph', '$2y$12$jy.hofFyxFfgJ1gidfoQ8O2xUAr3pVijdJb3vn9fkkFkYh9lrtPH2', 'Administration', 'N/A', NULL, '', '/assets/img/candidates/AuditorJohn.PNG', 'admin', NULL, 0, '2026-04-04 16:50:12', '2026-04-15 17:58:30'),
-(2, 'M2025-00010', 'Liam', 'Santos', 'D.', 'M2025-0001@student.edu.ph', '$2y$12$udbFEeIhD3cEC1kVj4Jne.0w9qdMFFDTzYyOhYXKAn03xD4tLmCNy', 'Bachelor of Science in Psychology', '1st Year', '2007-11-24', '1-A', '', 'student', NULL, 1, '2026-04-16 21:51:13', '2026-04-16 22:44:09'),
+(2, 'M2025-00010', 'Liam', 'Santos', 'D.', 'M2025-0001@student.edu.ph', '$2y$12$udbFEeIhD3cEC1kVj4Jne.0w9qdMFFDTzYyOhYXKAn03xD4tLmCNy', 'Bachelor of Science in Psychology', '', '2007-11-24', '1-A', '/uploads/profiles/student_2_1776417537.png', 'student', NULL, 1, '2026-04-16 21:51:13', '2026-04-17 17:18:57'),
 (3, 'M2025-00020', 'Emma', 'Reyes', 'X.', 'M2025-0002@student.edu.ph', '$2b$12$GuQmIu4vCOBoFniF5WIWQu2xOzWFtowvl6n2483/TG9XNuvPxyl2W', 'Bachelor of Science in Psychology', '1st Year', '2007-01-13', '1-A', '', 'student', NULL, 0, '2026-04-16 21:51:13', '2026-04-16 21:51:13'),
 (4, 'M2025-00030', 'Noah', 'Cruz', 'H.', 'M2025-0003@student.edu.ph', '$2b$12$3RUtlCYZiJAVzGawfpnue.i4NWfLd/PP0yF8cT2jYVpyGd.XI3NDK', 'Bachelor of Science in Psychology', '1st Year', '2007-05-21', '1-A', '', 'student', NULL, 0, '2026-04-16 21:51:13', '2026-04-16 21:51:13'),
 (5, 'M2025-00040', 'Olivia', 'Bautista', 'E.', 'M2025-0004@student.edu.ph', '$2b$12$8.FSlEl.0hsBcHcSMQtsw.LBtndDc.7ddHZi0RMHOaxYnvVSX/oFG', 'Bachelor of Science in Psychology', '1st Year', '2007-04-25', '1-A', '', 'student', NULL, 0, '2026-04-16 21:51:13', '2026-04-16 21:51:13'),
@@ -358,9 +381,9 @@ INSERT INTO `users` (`id`, `student_id`, `first_name`, `last_name`, `middle_init
 (174, 'M2025-00530', 'Adrian', 'Baclig', 'B.', 'M2025-0053@student.edu.ph', '$2b$12$g9TfinQIRfvclPMf.7zvBefqhxLW1B2OH7ODKy.uUakRfHGWvZ34a', 'Bachelor of Science in Biology', '1st Year', '2007-06-10', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (175, 'M2025-00540', 'Angela', 'Bactad', 'S.', 'M2025-0054@student.edu.ph', '$2b$12$T7s6B6kCcHnqG3jeLnK/.uAdrKm1rH9vhYp2wYMT5x2N.QSh.D04m', 'Bachelor of Science in Biology', '1st Year', '2007-01-26', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (176, 'M2025-00550', 'Bryan', 'Baguilat', 'Q.', 'M2025-0055@student.edu.ph', '$2b$12$Njq2zBW/gXQYdRUJWB69Fe0G0gArYSovko0fBPhvEI4U3WuHBO1su', 'Bachelor of Science in Biology', '1st Year', '2007-09-02', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
-(177, 'M2025-00560', 'Carla', 'Balane', 'F.', 'M2025-0056@student.edu.ph', '$2b$12$UxWWl0iogwtRcCmxzfBdJOh3/lVhIebGdwYPKUXbwAKUNOs7ZxXje', 'Bachelor of Science in Biology', '1st Year', '2007-09-29', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
-(178, 'M2025-00570', 'Kevin', 'Baluyot', 'Q.', 'M2025-0057@student.edu.ph', '$2b$12$Ui4xTgsMImI5mop8c4.mVOYllBFIInLWuyWJ/RSL3LBCoR8t6zsEq', 'Bachelor of Science in Biology', '1st Year', '2007-01-30', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14');
+(177, 'M2025-00560', 'Carla', 'Balane', 'F.', 'M2025-0056@student.edu.ph', '$2b$12$UxWWl0iogwtRcCmxzfBdJOh3/lVhIebGdwYPKUXbwAKUNOs7ZxXje', 'Bachelor of Science in Biology', '1st Year', '2007-09-29', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14');
 INSERT INTO `users` (`id`, `student_id`, `first_name`, `last_name`, `middle_initial`, `email`, `password_hash`, `course`, `year_level`, `birthday`, `section`, `profile_pic`, `role`, `verified_by`, `has_voted`, `created_at`, `updated_at`) VALUES
+(178, 'M2025-00570', 'Kevin', 'Baluyot', 'Q.', 'M2025-0057@student.edu.ph', '$2b$12$Ui4xTgsMImI5mop8c4.mVOYllBFIInLWuyWJ/RSL3LBCoR8t6zsEq', 'Bachelor of Science in Biology', '1st Year', '2007-01-30', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (179, 'M2025-00580', 'Patricia', 'Banal', 'F.', 'M2025-0058@student.edu.ph', '$2b$12$suwR2PR9CZuQ8N/qx9ETx.NKBPRZCEMQIwMyRZwc2ivr9mNIPH4GG', 'Bachelor of Science in Biology', '1st Year', '2007-02-11', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (180, 'M2025-00590', 'Joshua', 'Banzon', 'T.', 'M2025-0059@student.edu.ph', '$2b$12$DixSk5H6mtcB1Nx9id0gy./12S8kLQ3Tztsb9wp.WvSLM6svIGDB6', 'Bachelor of Science in Biology', '1st Year', '2007-02-05', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (181, 'M2025-00600', 'Bianca', 'Barcelo', 'V.', 'M2025-0060@student.edu.ph', '$2b$12$nBsbCfCC19csCtV376i8OenExOF8w1zOtrqwpZVPIjThb.3vpLc96', 'Bachelor of Science in Biology', '1st Year', '2007-02-04', '1-C', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
@@ -536,9 +559,9 @@ INSERT INTO `users` (`id`, `student_id`, `first_name`, `last_name`, `middle_init
 (351, 'M2024-00900', 'Ella', 'Arellano', 'K.', 'M2024-0090@student.edu.ph', '$2b$12$kLgmDlzbA765jy7P6/RuIONAU1MwnmwejmUvmZN2mZM15/KLxIZei', 'Bachelor of Science in Computer Science', '2nd Year', '2006-05-20', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (352, 'M2024-00910', 'Faith', 'Atienza', 'R.', 'M2024-0091@student.edu.ph', '$2b$12$ddaeNrDzfV6qvwWdUDhZrOJLlG/q7QXJE8CQrTZTR6q518Lxdqg/K', 'Bachelor of Science in Computer Science', '2nd Year', '2006-06-13', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (353, 'M2024-00920', 'Francis', 'Austria', 'E.', 'M2024-0092@student.edu.ph', '$2b$12$vhwxksqZ/u.nmxDxS2x9QO8Oa1WhSUIZKcvph.TGaUc5D9QnEEpUS', 'Bachelor of Science in Computer Science', '2nd Year', '2006-02-11', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
-(354, 'M2024-00930', 'Grace', 'Avila', 'H.', 'M2024-0093@student.edu.ph', '$2b$12$wfiozUBxmktZVbEihUNt9eyUy7evuo.ngoZTIEOgxq3SrTLE2LunW', 'Bachelor of Science in Computer Science', '2nd Year', '2006-03-19', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
-(355, 'M2024-00940', 'Hannah', 'Bacani', 'W.', 'M2024-0094@student.edu.ph', '$2b$12$Ersy7oWLKqZlSlu7zRsqTO.gL8ajvKzNOPj21MNwpk/KcuHEuKluC', 'Bachelor of Science in Computer Science', '2nd Year', '2006-07-16', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14');
+(354, 'M2024-00930', 'Grace', 'Avila', 'H.', 'M2024-0093@student.edu.ph', '$2b$12$wfiozUBxmktZVbEihUNt9eyUy7evuo.ngoZTIEOgxq3SrTLE2LunW', 'Bachelor of Science in Computer Science', '2nd Year', '2006-03-19', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14');
 INSERT INTO `users` (`id`, `student_id`, `first_name`, `last_name`, `middle_initial`, `email`, `password_hash`, `course`, `year_level`, `birthday`, `section`, `profile_pic`, `role`, `verified_by`, `has_voted`, `created_at`, `updated_at`) VALUES
+(355, 'M2024-00940', 'Hannah', 'Bacani', 'W.', 'M2024-0094@student.edu.ph', '$2b$12$Ersy7oWLKqZlSlu7zRsqTO.gL8ajvKzNOPj21MNwpk/KcuHEuKluC', 'Bachelor of Science in Computer Science', '2nd Year', '2006-07-16', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (356, 'M2024-00950', 'Ian', 'Banzon', 'W.', 'M2024-0095@student.edu.ph', '$2b$12$m2oCvxxF5srV/7VVXx31kO16NtbDPrvI3JTAYFZydgpi5zSJ67GxG', 'Bachelor of Science in Computer Science', '2nd Year', '2006-03-20', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (357, 'M2024-00960', 'Ivy', 'Barrios', 'C.', 'M2024-0096@student.edu.ph', '$2b$12$nXoS3WjAIf/BqZN6GhKkGeKCVTjaBe16MAQa6FUBMPYw0m9MIgxRW', 'Bachelor of Science in Computer Science', '2nd Year', '2006-04-20', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
 (358, 'M2024-00970', 'Jacob', 'Bautista', 'N.', 'M2024-0097@student.edu.ph', '$2b$12$q70SqQfUQmYM.CALBo8oN.LYP98P6efID5NJ6nt/VKSdpKsMNMZJK', 'Bachelor of Science in Computer Science', '2nd Year', '2006-08-01', '2-E', '', 'student', NULL, 0, '2026-04-16 21:51:14', '2026-04-16 21:51:14'),
@@ -611,7 +634,30 @@ INSERT INTO `votes` (`id`, `election_id`, `position_id`, `candidate_id`, `voter_
 (155, 3, 32, 56, 2, '2026-04-16 22:44:09'),
 (156, 3, 34, 64, 2, '2026-04-16 22:44:09'),
 (157, 3, 35, 66, 2, '2026-04-16 22:44:09'),
-(158, 3, 41, 84, 2, '2026-04-16 22:44:09');
+(158, 3, 41, 84, 2, '2026-04-16 22:44:09'),
+(161, 3, 29, 46, 42, '2026-04-17 22:42:47'),
+(162, 3, 30, 49, 42, '2026-04-17 22:42:47'),
+(163, 3, 31, 54, 42, '2026-04-17 22:42:47'),
+(164, 3, 33, 60, 42, '2026-04-17 22:42:47'),
+(165, 3, 34, 64, 42, '2026-04-17 22:42:47'),
+(166, 3, 36, 68, 42, '2026-04-17 22:42:47'),
+(167, 3, 37, 71, 42, '2026-04-17 22:42:47'),
+(168, 3, 41, 85, 42, '2026-04-17 22:42:47'),
+(169, 3, 29, 46, 8, '2026-04-17 23:35:01'),
+(170, 3, 30, 49, 8, '2026-04-17 23:35:01'),
+(171, 3, 31, 54, 8, '2026-04-17 23:35:01'),
+(172, 3, 32, 58, 8, '2026-04-17 23:35:01'),
+(173, 3, 34, 62, 8, '2026-04-17 23:35:01'),
+(174, 3, 35, 67, 8, '2026-04-17 23:35:01'),
+(175, 3, 37, 72, 8, '2026-04-17 23:35:01'),
+(176, 3, 41, 85, 8, '2026-04-17 23:35:01'),
+(177, 3, 29, 48, 3, '2026-04-18 14:21:30'),
+(178, 3, 30, 50, 3, '2026-04-18 14:21:30'),
+(179, 3, 31, 53, 3, '2026-04-18 14:21:30'),
+(180, 3, 32, 57, 3, '2026-04-18 14:21:30'),
+(181, 3, 34, 64, 3, '2026-04-18 14:21:30'),
+(182, 3, 36, 69, 3, '2026-04-18 14:21:30'),
+(183, 3, 41, 83, 3, '2026-04-18 14:21:30');
 
 --
 -- Indexes for dumped tables
@@ -640,6 +686,14 @@ ALTER TABLE `positions`
   ADD KEY `election_id` (`election_id`);
 
 --
+-- Indexes for table `rate_limits`
+--
+ALTER TABLE `rate_limits`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_rate_limit` (`ip_address`,`action`,`identifier`),
+  ADD KEY `idx_locked_until` (`locked_until`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -666,19 +720,25 @@ ALTER TABLE `votes`
 -- AUTO_INCREMENT for table `candidates`
 --
 ALTER TABLE `candidates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT for table `elections`
 --
 ALTER TABLE `elections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+
+--
+-- AUTO_INCREMENT for table `rate_limits`
+--
+ALTER TABLE `rate_limits`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -690,7 +750,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=159;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=184;
 
 --
 -- Constraints for dumped tables
