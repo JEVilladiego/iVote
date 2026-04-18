@@ -4,12 +4,13 @@
 // =============================================================
 define('BASE_URL', '/');
 
-define('DB_HOST', getenv('MYSQLHOST')     ?: 'localhost');
-define('DB_USER', getenv('MYSQLUSER')     ?: 'root');
-define('DB_PASS', getenv('MYSQLPASSWORD') ?: '');
-define('DB_NAME', getenv('MYSQLDATABASE') ?: 'ivote_cs');
-define('DB_PORT', getenv('MYSQLPORT')     ?: '3306');
-
+$url = parse_url(getenv('DATABASE_URL'));
+define('DB_HOST', $url['host']);
+define('DB_USER', $url['user']);
+define('DB_PASS', $url['pass']);
+define('DB_NAME', ltrim($url['path'], '/'));
+define('DB_PORT', $url['port'] ?? '3306');
+error_log('DATABASE_URL = ' . getenv('DATABASE_URL'));
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
