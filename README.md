@@ -2,9 +2,17 @@
 
 ## 1. Database Setup
 1. Open phpMyAdmin or your MySQL client
-2. Run `schema.sql` — this creates the database, all tables, and the default admin account
+2. Run `ivote_cs.sql` — this creates the database, all tables, and the default admin account
 
-## 2. Configure Database Connection
+## 2. Ignoreable Files
+Here are the files unrelated to local hosting kaya di ko na nilagay sa file structure hahahaha ito yung chinat ko sayo
+1. Procfile
+2. composer.json
+3. nixpacks.toml
+4. php.ini
+5. router.php
+   
+## 3. Configure Database Connection
 Edit `/includes/db.php` and set your credentials:
 ```php
 define('DB_HOST', 'localhost');
@@ -12,7 +20,7 @@ define('DB_USER', 'your_db_user');
 define('DB_PASS', 'your_db_password');
 define('DB_NAME', 'ivote_cs');
 ```
-## 3. First Login (Admin)
+## 4. First Login (Admin)
 ```
 Student ID : ADM-9901
 Password   : Passwordnije
