@@ -23,7 +23,7 @@ $navActive = 'home';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background-color: #f8fafc; padding-top: 80px; }
 
@@ -107,6 +107,55 @@ $navActive = 'home';
             font-weight: 800; margin-bottom: 10px;
         }
         .step-card p { color: #33553e; font-size: 0.9rem; line-height: 1.6; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 2.2fr 2.8fr;
+            gap: 20px;
+            margin-top: 5%;
+            margin-left: 15%;
+        }
+
+        .unq {
+            background: #f8fafc;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .unq h2 { 
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 40px; 
+            position: relative;
+            padding-bottom: 10px;
+            font-family: var(--heading-font);
+            color: var(--deep-green);
+        }
+
+        .unq h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--deep-green);
+        }
+
+        .unq li{
+            font-family: var(--body-font);
+            margin-left: 20px;
+            color: var(--deep-green);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .info-grid { grid-template-columns: 1fr; }
+            .info-grid { margin-left: 0;}
+        }
     </style>
 </head>
 <body>
@@ -152,7 +201,30 @@ $navActive = 'home';
             <p>Watch the live, transparent results on the dashboard as votes are counted in real-time.</p>
         </div>
     </div>
+
+    <section class="info-grid">
+        <div class = "unq">
+            <h2>Voter Eligibility</h2>
+            <ul>
+                <li>Currently enrolled this semester</li>
+                <li>Have a registered account on the COSA Voting System</li>
+            </ul>
+            <br><br>
+        </div>
+        <div class = "unq">
+            <h2>Voting Rules</h2>
+            <ul>
+                <li>One vote per position only</li>
+                <li>No vote buying or coercion</li>
+                <li>Submitted ballots are final</li>
+            </ul>
+        </div>
+    </section>
 </section>
+
+    
+ 
+
 
 <!-- GUEST AUTH MODAL
 <div class="modal-overlay" id="authModal">
@@ -167,6 +239,8 @@ $navActive = 'home';
     </div>
 </div> -->
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 </body>
 </html>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

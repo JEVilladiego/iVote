@@ -3,6 +3,12 @@
 //  DATABASE CONNECTION
 //  Edit these constants to match your MySQL credentials.
 // =============================================================
+// Builds the full base URL from the actual incoming request.
+// Works on localhost:3000, 192.168.x.x:3000, or a real domain — no changes needed.
+$_protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$_host     = $_SERVER['HTTP_HOST']; // e.g. "192.168.1.5:3000" or "localhost:3000"
+define('BASE_URL', $_protocol . '://' . $_host . '/');
+
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');

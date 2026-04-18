@@ -97,7 +97,7 @@ $navActive = 'home';
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         * { box-sizing:border-box; margin:0; padding:0; }
         body {
@@ -315,7 +315,7 @@ $navActive = 'home';
     </form>
 </div>
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 <script>
 function toggleEdit() {
     const btn      = document.getElementById('edit-button');

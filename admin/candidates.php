@@ -125,8 +125,8 @@ $flash         = getFlash();
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Candidates | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <base href="/ivote/">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <base href="<?= BASE_URL ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
@@ -204,6 +204,29 @@ $flash         = getFlash();
         .empty-pos { padding:16px 20px; color:#94a3b8; font-size:0.85rem; text-align:center; }
         .no-election { text-align:center; padding:60px 20px; color:#94a3b8; }
         .no-election .icon { font-size:3rem; margin-bottom:14px; }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+            .main { margin-left:0; padding:20px; }
+            h2 { font-size:1.3rem; margin-bottom:16px; margin-top: 8px; margin-left: 45px;}
+
+            /* Election selector: dropdown full-width */
+            .election-selector { flex-direction:column; align-items:stretch; gap:8px; }
+            .election-select { min-width:0; width:100%; }
+
+            /* content-grid already collapses at 1100px; on mobile just ensure padding is sane */
+            .content-grid { gap:20px; }
+
+            /* Lock banner: tighten padding */
+            .lock-banner { padding:12px 14px; }
+
+            /* Candidate rows: allow party badge and delete to wrap if very tight */
+            .cand-row { flex-wrap:wrap; gap:8px; }
+            .cand-info { flex:1; min-width:0; }
+
+            /* Add candidate button: full width */
+            .btn-add { padding:12px; }
+        }
     </style>
 </head>
 <body>
@@ -364,6 +387,6 @@ $flash         = getFlash();
         <?php endif; ?>
     </main>
 </div>
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 </body>
 </html>

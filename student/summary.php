@@ -144,7 +144,7 @@ $navActive = 'dashboard';
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ballot Summary | iVOTE CS</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/shared.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
 <style>
 :root {
     --dark-green:   #12341d;

@@ -4,24 +4,25 @@
 //  Usage:  $navActive = 'home';  require INCLUDES . 'navbar.php';
 //  $navActive values: 'home' | 'dashboard' | 'about'
 // =============================================================
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
 
-if (session_status() === PHP_SESSION_NONE) session_start();
 
 $user      = currentUser();
 $role      = $user['role'];
 $navActive = $navActive ?? '';
 
 // Home is the same page for everyone
-$homeUrl = '/index.php';
+$homeUrl = BASE_URL .'index.php';
 
 if ($role === 'student') {
-    $dashboardUrl = '/student/dashboard.php';
-    $homeUrl = '/student/home.php';
+    $dashboardUrl =BASE_URL . 'student/dashboard.php';
+    $homeUrl = BASE_URL . 'student/home.php';
 } else {
-    $dashboardUrl = '/guest/dashboard.php';
+    $dashboardUrl = BASE_URL . 'guest/dashboard.php';
 }
 
-$aboutUrl = '/about.php';
+$aboutUrl = BASE_URL . 'about.php';
 
 function navLink(string $href, string $label, string $active, string $key): string {
     $cls = ($active === $key) ? 'nav-link active' : 'nav-link';
@@ -29,10 +30,11 @@ function navLink(string $href, string $label, string $active, string $key): stri
 }
 
 ?>
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
 <nav class="navbar">
     <a href="<?= $homeUrl ?>" class="nav-logo">
         <div class="logo-icon">
-            <img src="/assets/img/icons/logo.png" alt="logo" style="width:100%;height:100%;object-fit:contain;"
+            <img src="<?php echo BASE_URL;?>assets/img/icons/logo.png" alt="logo" style="width:100%;height:100%;object-fit:contain;"
                  onerror="this.style.display='none'">
         </div>
         <div class="logo-text">COS ONLINE VOTING SYSTEM</div>
@@ -53,7 +55,7 @@ function navLink(string $href, string $label, string $active, string $key): stri
     <!-- Desktop auth (hidden on mobile) -->
     <?php if ($role === 'guest' || !isLoggedIn()): ?>
     <div class="nav-auth">
-        <a href="/login.php" class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/login.php') echo ' active'; ?>" style="text-decoration: none; display: inline-block;">
+        <a href="<?= BASE_URL ?>login.php" class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === BASE_URL . 'login.php') echo ' active'; ?>" style="text-decoration: none; display: inline-block;">
             Log In
         </a>
     </div>
@@ -71,8 +73,8 @@ function navLink(string $href, string $label, string $active, string $key): stri
                 <p>Student ID: <?= htmlspecialchars($user['student_id']) ?></p>
             </div>
             <div class="divider"></div>
-            <a href="/student/account.php" class="update-link">My Account</a>
-            <form method="POST" action="/logout.php">
+            <a href="<?= BASE_URL ?>student/account.php" class="update-link">My Account</a>
+            <form method="POST" action="<?= BASE_URL ?>logout.php">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <button type="submit" class="btn-logout-oval">Log Out</button>
             </form>
@@ -104,8 +106,8 @@ function navLink(string $href, string $label, string $active, string $key): stri
     <!-- Auth / user section in mobile panel -->
     <div class="nav-mobile-auth">
         <?php if ($role === 'guest' || !isLoggedIn()): ?>
-            <a href="/login.php"
-               class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/login.php') echo ' active'; ?>"
+            <a href="<?= BASE_URL ?>login.php"
+               class="btn-login-oval<?php if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === BASE_URL . 'login.php') echo ' active'; ?>"
                style="text-decoration:none;text-align:center;">
                 Log In
             </a>
@@ -114,8 +116,8 @@ function navLink(string $href, string $label, string $active, string $key): stri
                 <strong><?= htmlspecialchars($user['name']) ?></strong>
                 <span>Student ID: <?= htmlspecialchars($user['student_id']) ?></span>
             </div>
-            <a href="/student/account.php" class="update-link">My Account</a>
-            <form method="POST" action="/logout.php">
+            <a href="<?= BASE_URL ?>student/account.php" class="update-link">My Account</a>
+            <form method="POST" action="<?= BASE_URL ?>logout.php">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <button type="submit" class="btn-logout-oval">Log Out</button>
             </form>

@@ -245,7 +245,7 @@ $navActive = 'dashboard';
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cast Your Vote | iVOTE CS</title>
-<link rel="stylesheet" href="/assets/css/shared.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -384,24 +384,105 @@ main{margin-left:272px;flex:1;padding:36px 40px;background:var(--page-bg);}
 .modal-cancel:hover{border-color:var(--muted-green);color:var(--forest-green);background:rgba(18,52,29,0.04);}
 .modal-confirm{flex:1;padding:12px;background:var(--forest-green);border:none;border-radius:9px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#fff;cursor:pointer;transition:background 0.2s,transform 0.15s;}
 .modal-confirm:hover{background:var(--dark-green);transform:scale(1.02);}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px and below
+   ══════════════════════════════════════════════════════════ */
+
+/* Dark overlay behind aside when open on mobile */
+.aside-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:109;backdrop-filter:blur(2px);
+}
+.aside-overlay.open{display:block;}
+
+/* Sticky "Positions" pill button — mobile only, hidden on desktop */
+.positions-pill-btn{
+  display:none;
+  position:sticky;
+  top:0;
+  z-index:80;
+  width:100%;
+  padding:10px 16px;
+  background:var(--forest-green);
+  color:var(--gold);
+  border:none;
+  border-top:1px solid rgba(200,168,75,0.25);
+  border-bottom:1px solid rgba(200,168,75,0.25);
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  cursor:pointer;
+  text-align:left;
+  gap:10px;align-items:center;
+  transition:background 0.2s;
+}
+.positions-pill-btn:hover{background:var(--dark-green);}
+.positions-pill-btn .pill-icon{font-size:14px;}
+.positions-pill-btn .pill-arrow{margin-left:auto;transition:transform 0.25s;}
+.positions-pill-btn.open .pill-arrow{transform:rotate(180deg);}
+
+@media(max-width:768px){
+
+  /* Aside: slide off-screen, comes back when .open */
+  aside{
+    transform:translateX(-110%);
+    transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index:110;
+  }
+  aside.open{transform:translateX(0);}
+
+  /* Main: full width, reduced padding */
+  main{margin-left:0;padding:0 0 24px;}
+
+  /* Show the sticky pill button */
+  .positions-pill-btn{display:flex;}
+
+  /* Page content padding (sits below the sticky pill) */
+  #page-content{padding:20px 16px 0;}
+
+  /* ballot-submit-bar: hide 'Voting as' span, keep election title only */
+  .voting-as-info{display:none;}
+  .ballot-submit-bar{padding:0 14px;}
+  .election-title-bar{font-size:10px;}
+  .submit-btn{padding:9px 14px;font-size:11px;white-space:nowrap;}
+
+  /* Page title smaller */
+  .page-title{font-size:21px;}
+
+  /* Candidate grid: single column */
+  .candidates-grid{grid-template-columns:1fr;}
+
+  /* Abstain card: tighter padding */
+  .abstain-card{padding:28px 18px 24px;}
+
+  /* Modal: tighter padding on small screens */
+  .modal-box{padding:28px 20px 24px;}
+}
+
+  .ballot-submit-bar{
+    margin-top: 5px; margin-bottom: 10px;
+  }
 </style>
 </head>
 <body>
 
 <?php require_once __DIR__ . '/../includes/navbar.php'; ?>
 
+<!-- Overlay: closes the position sidebar when tapped on mobile -->
+<div class="aside-overlay" id="asideOverlay"></div>
+
 <div class="ballot-submit-bar">
   <div class="election-title-bar">
     🗳️ Official Election &nbsp;·&nbsp; <?= htmlspecialchars($election['title']) ?>
-    &nbsp;&nbsp;|&nbsp;&nbsp;
-    Voting as: <strong style="color:#fff"><?= htmlspecialchars($user['first_name'] . ' ' . $user['student_id']) ?></strong>
+    <span class="voting-as-info">&nbsp;&nbsp;|&nbsp;&nbsp;Voting as: <strong style="color:#fff"><?= htmlspecialchars($user['first_name'] . ' ' . $user['student_id']) ?></strong></span>
   </div>
   <button class="submit-btn" onclick="handleFinalSubmit()">Submit Ballot</button>
 </div>
 
 <div class="layout">
 
-<aside>
+<aside id="voteAside">
   <div class="sidebar-heading">Candidate Positions</div>
   <?php
   $executivePositions = ['President','Vice-President Internal','Vice-President External','General Secretary','Deputy Secretary','Treasurer','Auditor','Business Manager','Public Information Officer'];
@@ -435,6 +516,12 @@ main{margin-left:272px;flex:1;padding:36px 40px;background:var(--page-bg);}
 </aside>
 
 <main>
+  <!-- Sticky "Positions" button — mobile only, opens the position sidebar -->
+  <button class="positions-pill-btn" id="positionsPillBtn" aria-expanded="false" aria-label="Toggle positions sidebar">
+    <span class="pill-icon">🗳️</span>
+    Positions
+    <span class="pill-arrow">▼</span>
+  </button>
   <div id="page-content">
     <?php
     // Render the first position by default
@@ -877,10 +964,43 @@ window.addEventListener('beforeunload', function(e) {
     e.returnValue = '';
 });
 
-// Close on backdrop click
+// Close modals on backdrop click
 document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('visible'); });
 });
+
+// ── Mobile: position sidebar (aside) toggle ────────────────
+(function () {
+    var aside   = document.getElementById('voteAside');
+    var overlay = document.getElementById('asideOverlay');
+    var pillBtn = document.getElementById('positionsPillBtn');
+
+    function openAside() {
+        aside.classList.add('open');
+        overlay.classList.add('open');
+        pillBtn.classList.add('open');
+        pillBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeAside() {
+        aside.classList.remove('open');
+        overlay.classList.remove('open');
+        pillBtn.classList.remove('open');
+        pillBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    pillBtn.addEventListener('click', function () {
+        aside.classList.contains('open') ? closeAside() : openAside();
+    });
+
+    overlay.addEventListener('click', closeAside);
+
+    // Auto-close when a position is selected (mobile only)
+    aside.querySelectorAll('.nav-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            if (window.innerWidth <= 768) closeAside();
+        });
+    });
+})();
 </script>
 </body>
 </html>

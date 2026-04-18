@@ -17,7 +17,7 @@ $navActive = 'home';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background-color: #f8fafc; padding-top: 80px; }
 
@@ -160,6 +160,6 @@ $navActive = 'home';
     </div>
 </div> -->
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 </body>
 </html>

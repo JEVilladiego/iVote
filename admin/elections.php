@@ -140,8 +140,8 @@ $flash         = getFlash();
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Elections | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <base href="/ivote/">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <base href="<?= BASE_URL ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
@@ -233,6 +233,30 @@ $flash         = getFlash();
 
         .empty-state { text-align:center; padding:60px 20px; color:#94a3b8; }
         .empty-state .icon { font-size:3rem; margin-bottom:16px; }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+            .main { margin-left:0; padding:20px; }
+            .page-header h2 { font-size:1.25rem; margin-left: 45px; margin-top: 7px;}
+
+            /* Create form: 2-col grid collapses to 1-col */
+            .form-grid { grid-template-columns:1fr; }
+            /* The .full span:2 rule is irrelevant at 1-col but reset it cleanly */
+            .form-group.full { grid-column:span 1; }
+            /* Create button full-width */
+            .btn-create { width:100%; text-align:center; }
+
+            /* Election card padding */
+            .election-card { padding:18px 16px; }
+
+            /* Reschedule form: 3-col (start, end, save) → stacked */
+            .reschedule-form .rform-grid {
+                grid-template-columns:1fr;
+            }
+
+            /* Election top: title and pill can wrap, already does — just tighten gap */
+            .election-top { gap:10px; }
+        }
     </style>
 </head>
 <body>
@@ -384,7 +408,7 @@ $flash         = getFlash();
         <?php endif; ?>
     </main>
 </div>
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 <script>
     function toggleReschedule(id) {
         const panel = document.getElementById('reschedule-' + id);

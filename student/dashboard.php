@@ -107,10 +107,10 @@ $navActive = 'dashboard';
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | iVOTE CS</title>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/shared.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
   <style>
     :root {
       --deep:        #12341d;
@@ -590,15 +590,32 @@ $navActive = 'dashboard';
     .empty-state p { color: rgba(18,52,29,0.65); font-size: 0.96rem; max-width: 440px; margin: 0 auto; line-height: 1.7; }
 
     @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2,1fr); } .print-actions { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) {
-      .hero-banner { flex-direction: column; }
+    @media (max-width: 768px) {
+      .hero-banner { flex-direction: column;}
       .hero-right { grid-template-columns: repeat(2,1fr); min-width: unset; width: 100%; }
       .stats-row { grid-template-columns: repeat(2,1fr); }
       .summary-figures { grid-template-columns: 1fr; }
       .ongoing-card { padding: 28px 20px; }
       .vote-cta { flex-direction: column; }
       .print-actions { grid-template-columns: 1fr; }
+          .voted-banner {
+      position: absolute;
+      top: 8px;
+      right: -10px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transform: rotate(15deg);
     }
+
+    .voted-banner::before {
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+    }}
 
     /* ── Print styles ── */
     @media print {
@@ -1021,7 +1038,7 @@ $navActive = 'dashboard';
 
   <?php endif; ?>
 
-  <script src="/assets/js/shared.js"></script>
+  <script src="<?= BASE_URL ?>assets/js/shared.js"></script>
   <script>
   <?php if ($election && in_array($election['status'], ['ongoing','upcoming'])): ?>
   (function () {

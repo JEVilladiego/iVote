@@ -12,7 +12,7 @@ $navActive = 'about';
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About the Creators | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         :root { --deep-green:#12341d; --tint-green:#d5e8db; --white-glass:rgba(255,255,255,0.3); }
         body {
@@ -123,6 +123,7 @@ $navActive = 'about';
 </div>
 <?php endif; ?>
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 </body>
 </html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

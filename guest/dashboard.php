@@ -78,10 +78,10 @@ $navActive = 'dashboard';
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | iVOTE CS</title>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/shared.css">
+  <link rel="stylesheet" href="<? echo BASE_URL ?>assets/css/shared.css">
   <style>
     :root {
       --deep:        #12341d;
@@ -563,6 +563,7 @@ $navActive = 'dashboard';
     @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2,1fr); } .print-actions { grid-template-columns: 1fr; } }
     @media (max-width: 640px) {
       .hero-banner { flex-direction: column; }
+      .hero-left { min-width: 0; width: 100%; }
       .hero-right { grid-template-columns: repeat(2,1fr); min-width: unset; width: 100%; }
       .stats-row { grid-template-columns: repeat(2,1fr); }
       .summary-figures { grid-template-columns: 1fr; }
@@ -909,7 +910,7 @@ $navActive = 'dashboard';
 
   <?php endif; ?>
 
-  <script src="/assets/js/shared.js"></script>
+  <script src="<?= BASE_URL ?>assets/js/shared.js"></script>
   <script>
   <?php if ($election && in_array($election['status'], ['ongoing','upcoming'])): ?>
   (function () {

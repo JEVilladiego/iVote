@@ -123,8 +123,8 @@ $sidebarActive = 'accounts';
     <title>Manage Accounts | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <base href="/ivote/">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <base href="<?= BASE_URL ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
@@ -222,6 +222,26 @@ $sidebarActive = 'accounts';
         .form-error { background:#fee2e2; color:#991b1b; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; margin-bottom:12px; display:none; }
         .form-success { background:#d1fae5; color:#065f46; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; margin-bottom:12px; display:none; }
         .required-star { color:#ef4444; }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+            .main { margin-left:0; margin-top:7px; padding:20px; }
+            h2 { margin-left: 50px; font-size:1.3rem; margin-bottom:16px; }
+
+            /* Top bar: let everything wrap naturally at smaller sizes */
+            .top-bar { gap:10px; }
+            .filters { gap:8px; }
+            /* Inputs shrink gracefully but don't force full-width */
+            .filter-input { min-width:120px; }
+
+            /* Account box: stack info above actions on very narrow screens */
+            .account-box { flex-wrap:wrap; gap:12px; padding:16px; }
+            .acc-info { flex:1; min-width:0; }
+            .acc-actions { flex-shrink:0; }
+
+            /* 2-col form grid in modal: 1 col on mobile */
+            .form-grid-2 { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
@@ -356,7 +376,7 @@ $sidebarActive = 'accounts';
     </div>
 </div>
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 <script>
 // ── View detail ──────────────────────────────────────────────
 async function viewAccount(id) {

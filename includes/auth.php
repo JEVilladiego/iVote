@@ -14,18 +14,18 @@ header('Pragma: no-cache');
 // ---- Guards ------------------------------------------------
 
 /** Redirect to login if not logged in at all. */
-function requireLogin(string $redirect = '/login.php'): void {
+function requireLogin(string $redirect = ''): void {
     if (empty($_SESSION['user_id'])) {
-        header("Location: $redirect");
+        header("Location: " . (BASE_URL ?? '/') . ltrim($redirect ?: 'login.php', '/'));
         exit;
     }
 }
 
 /** Redirect if logged-in user is not an admin. */
-function requireAdmin(string $redirect = '/login.php'): void {
+function requireAdmin(string $redirect = ''): void {
     requireLogin($redirect);
     if (($_SESSION['role'] ?? '') !== 'admin') {
-        header("Location: $redirect");
+        header("Location: " . (BASE_URL ?? '/') . ltrim($redirect ?: 'login.php', '/'));
         exit;
     }
 }
@@ -33,10 +33,10 @@ function requireAdmin(string $redirect = '/login.php'): void {
 /**
  * Redirect if logged-in user is not a student.
  */
-function requireStudent(string $redirect = '/login.php'): void {
+function requireStudent(string $redirect = ''): void {
     requireLogin($redirect);
     if (($_SESSION['role'] ?? '') !== 'student') {
-        header("Location: $redirect");
+        header("Location: " . (BASE_URL ?? '/') . ltrim($redirect ?: 'login.php', '/'));
         exit;
     }
 
@@ -48,15 +48,15 @@ function requireStudent(string $redirect = '/login.php'): void {
 /** Redirect already-logged-in users away from login/register pages. */
 function redirectIfLoggedIn(): void {
     if (!empty($_SESSION['user_id'])) {
+        $base   = BASE_URL ?? '/';
         $role   = $_SESSION['role']   ?? 'student';
-        $status = $_SESSION['status'] ?? '';
 
         if ($role === 'admin') {
-            header("Location: /admin/dashboard.php");
+            header("Location: {$base}admin/dashboard.php");
         } elseif ($role === 'student') {
-            header("Location: /student/dashboard.php");
+            header("Location: {$base}student/dashboard.php");
         } else {
-            header("Location: /login.php");
+            header("Location: {$base}login.php");
         }
         exit;
     }

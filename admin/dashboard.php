@@ -98,8 +98,8 @@ $printDate  = date('F d, Y');
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | iVOTE CS</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-    <base href="/ivote/">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <base href="<?= BASE_URL ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         body { background:#f8fafc; padding-top:0px; }
         .page-wrap { display:flex; }
@@ -202,6 +202,24 @@ $printDate  = date('F d, Y');
         .sidebar .logo-text { font-size: 18px; }
         .sidebar-logout { margin-top: auto; padding-top: 20px; border-top: 1px solid #e2e8f0; }
         #printDoc { display:none; }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+            .main { margin-left:0; padding:20px; }
+            h1 { font-size:1.3rem; margin-left: 45px; margin-top: 8px; margin-bottom: 15px;}
+            .stat-value { font-size:1.6rem; }
+            /* Countdown blocks: don't let them get too tiny */
+            .cd-block { min-width:56px; padding:10px 12px; }
+            .cd-num { font-size:1.4rem; }
+            /* Winner cards: full-width on phones */
+            .results-grid { grid-template-columns:1fr; }
+            /* Action cards: 1-col on phones */
+            .actions-grid { grid-template-columns:1fr; }
+            /* Download button: full width */
+            .btn-download { width:100%; justify-content:center; }
+            /* Election title row: stack pill below title */
+            .election-title-row { flex-direction:column; align-items:flex-start; gap:8px; }
+        }
 
         @media print {
             /* Hide the normal page and browser-injected header */
@@ -514,7 +532,7 @@ $printDate  = date('F d, Y');
 </div>
 <?php endif; ?>
 
-<script src="/assets/js/shared.js"></script>
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
 <script>
 <?php if ($election && in_array($election['status'], ['ongoing','upcoming'])): ?>
 (function () {

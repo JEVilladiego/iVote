@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/shared.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/shared.css">
     <style>
         :root {
             --deep-green: #12341d; --mid-green: #33553e;
@@ -141,6 +141,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .secure-text { font-size:9px; color:#515154; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
         .alert { padding:10px 14px; border-radius:10px; margin-bottom:14px; font-size:13px; font-weight:600; }
         .alert-error   { background:rgba(239,68,68,0.25); color:#fff; border:1px solid rgba(239,68,68,0.4); }
+
+        footer {
+            background: var(--deep-forest);
+            color: var(--pale-leaf);
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        footer {
+            background: #12341d;
+            color: #699878;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main { margin-left:0; padding:20px; }
+            #container-card { margin:20px; }
+}
     
     </style>
 </head>
@@ -158,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <div class="header-section">
         <div class="badge"><span>COLLEGE OF SCIENCE</span></div>
-        <h1 id="form-title">Student Login</h1>
+        <h1 id="form-title">Login</h1>
     </div>
 
     <div class="form-container">
@@ -182,6 +201,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<script src="/assets/js/shared.js"></script>
+
+<script src="<?= BASE_URL ?>assets/js/shared.js"></script>
+
 </body>
 </html>
+
+<!-- <?php require_once __DIR__ . '/includes/footer.php'; ?> -->
