@@ -1,7 +1,6 @@
 <?php
 // =============================================================
 //  index.php — Public landing page  (Guest view)
-//  Combined: guest.html (navBar - Melo) + Homepage.html (Alwin)
 // =============================================================
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';

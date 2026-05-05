@@ -1,8 +1,6 @@
 <?php
 // =============================================================
 //  admin/candidates.php
-//  Adding or removing candidates is BLOCKED when the election
-//  status is 'ongoing'. Only allowed for 'upcoming' elections.
 // =============================================================
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';

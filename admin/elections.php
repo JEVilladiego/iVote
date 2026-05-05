@@ -1,6 +1,6 @@
 <?php
 // =============================================================
-//  admin/elections.php  (replaces electionmanager.php — elections side)
+//  admin/elections.php 
 // =============================================================
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';

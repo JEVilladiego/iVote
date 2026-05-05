@@ -1,8 +1,6 @@
 <?php
 // =============================================================
 //  includes/admin_sidebar.php
-//  Sidebar styled to match the public navbar aesthetic.
-//  Drop-in replacement — no changes needed in other files.
 // =============================================================
 
 require_once __DIR__ . '/../includes/db.php';
@@ -363,7 +361,6 @@ $currentUser = currentUser();
 
     overlay.addEventListener('click', closeSidebar);
 
-    // Close on nav link click (useful if page doesn't fully reload)
     sidebar.querySelectorAll('a').forEach(function (link) {
         link.addEventListener('click', closeSidebar);
     });

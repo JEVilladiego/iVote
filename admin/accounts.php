@@ -1,8 +1,6 @@
 <?php
 // =============================================================
 //  admin/accounts.php
-//  Admin feeds student credentials directly. Accounts are
-//  created as 'approved' instantly — no COR or verification flow.
 // =============================================================
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';

@@ -1,6 +1,6 @@
 <?php
 // =============================================================
-//  about.php  (replaces about_us.html)
+//  about.php
 // =============================================================
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
@@ -78,7 +78,6 @@ $navActive = 'about';
 
     <div class="dev-scroll-wrapper">
         <?php
-        // ---- Add your real team members here ----
         $team = [
             ['name'=>'Alwin Publico',  'role'=>'Frontend Developer'],
             ['name'=>'Barbie Ann San Buenaventura',  'role'=>'Frontend Developer'],
